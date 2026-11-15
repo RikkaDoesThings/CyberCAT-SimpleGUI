@@ -51,7 +51,7 @@ namespace ResourceGenerator
             if (generators.Remove("all"))
             {
                 // "mods" is left out, the editor doesn't use Mods.json
-                generators.UnionWith(new[] { "vehicles", "items", "modifiergroups", "names", "perks", "cyberware" });
+                generators.UnionWith(new[] { "vehicles", "items", "modifiergroups", "names", "perks", "cyberware", "iconicweapons" });
             }
 
             Console.WriteLine($"Writing {string.Join(", ", generators)} to {Directory.GetCurrentDirectory()}");
@@ -100,6 +100,7 @@ namespace ResourceGenerator
             if (generators.Contains("names")) GenerateDisplayNames(tweakDb!, gameDir);
             if (generators.Contains("perks")) GeneratePerks(tweakDb!, gameDir);
             if (generators.Contains("cyberware")) GenerateCyberware(tweakDb!);
+            if (generators.Contains("iconicweapons")) GenerateIconicWeapons(tweakDb!);
         }
 
         // Writes Cyberware.json: { item hash: equipment area } for every cyberware item, e.g. "EyesCW"
@@ -550,6 +551,71 @@ namespace ResourceGenerator
 
             dict = dict.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
             File.WriteAllText("ItemClasses.json", JsonSerializer.Serialize(dict, new JsonSerializerOptions { WriteIndented = true }));
+        }
+
+        private static void GenerateIconicWeapons(TweakDB tweakDb)
+        {
+            var allIconics = new SortedSet<ulong>();
+            var displayNames = JsonSerializer.Deserialize<Dictionary<string, Dictionary<ulong, string>>>(
+                File.ReadAllText("DisplayNames.json"))!["en-us"];
+
+            var byName = new Dictionary<string, List<(ulong Id, string Resolved)>>();
+
+            foreach (var (id, type) in tweakDb.Records)
+            {
+                if (!type.IsAssignableTo(typeof(gamedataWeaponItem_Record)) || tweakDb.GetFullRecord(id) is not gamedataWeaponItem_Record record)
+                {
+                    continue;
+                }
+
+                if (record.Tags == null || !record.Tags.Any(t => t == "IconicWeapon"))
+                {
+                    continue;
+                }
+
+                var resolved = ((TweakDBID)id).GetResolvedText();
+                if (resolved == null)
+                {
+                    continue;
+                }
+
+                if (!displayNames.TryGetValue(id, out var name) || string.IsNullOrWhiteSpace(name) || name.StartsWith("!OBSOLETE", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"Skipping iconic without valid name: {resolved}");
+                    continue;
+                }
+
+                allIconics.Add(id);
+
+                // Skip NPC/left-hand/preview/hologram presets from being chosen as canonical spawnable weapons
+                if (!byName.TryGetValue(name, out var list))
+                {
+                    list = new List<(ulong, string)>();
+                    byName[name] = list;
+                }
+                list.Add((id, resolved));
+            }
+
+            var canonical = new SortedSet<ulong>();
+            foreach (var (name, list) in byName.OrderBy(x => x.Key))
+            {
+                var best = list
+                    .OrderBy(x => x.Resolved.Contains("_NPC", StringComparison.OrdinalIgnoreCase) || x.Resolved.Contains("_Left_Hand", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+                    .ThenBy(x => x.Resolved.Contains("_Legendary", StringComparison.OrdinalIgnoreCase) || x.Resolved.Contains("_Epic", StringComparison.OrdinalIgnoreCase) || x.Resolved.Contains("_Rare", StringComparison.OrdinalIgnoreCase) || x.Resolved.Contains("_Uncommon", StringComparison.OrdinalIgnoreCase) || x.Resolved.Contains("_Common", StringComparison.OrdinalIgnoreCase) ? 1 : 0)
+                    .ThenBy(x => x.Resolved.Length)
+                    .ThenBy(x => x.Resolved, StringComparer.Ordinal)
+                    .First();
+                canonical.Add(best.Id);
+            }
+
+            var payload = new
+            {
+                All = allIconics,
+                Canonical = canonical
+            };
+
+            File.WriteAllText("IconicWeapons.json", JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine($"Generated IconicWeapons.json: {allIconics.Count} total, {canonical.Count} canonical.");
         }
 
         public class ItemRecord2

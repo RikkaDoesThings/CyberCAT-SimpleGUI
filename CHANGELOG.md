@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.35.0
+
+- **Iconic Weapons Filter & Bulk Stash (`Add Item` & `Inventory`):** added an **Iconic only** filter checkbox in the `Add Item` dialog covering all 358 iconic weapon presets from TweakDB, plus an **Add Missing Iconics** quick action in the Inventory tab that checks both V's Inventory and Stash and adds every missing iconic weapon (115 unique weapons) directly to V's Stash at Tier 5++.
+- **Build Export / Import (`Perks` tab):** added **Export Build...** and **Import Build...** buttons to save and transfer complete character builds (Attributes, 2.0 + Relic Perks, and equipped Cyberware per area/slot) as portable `.json` presets between saves.
+
 ## 0.34.1
 
 - **Editor Settings dialog (`Settings` in the bottom status bar):** configure **Theme** (Windows / Light / Dark), **Undo steps** (`0` to disable Undo/Redo), and **Check for updates** directly from the UI without manually creating `config.json` (useful in the Standalone `.exe`).

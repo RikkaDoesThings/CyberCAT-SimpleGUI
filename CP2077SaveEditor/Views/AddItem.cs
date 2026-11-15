@@ -74,8 +74,11 @@ namespace CP2077SaveEditor.Views
             var terms = txt_Search.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var type = cb_Type.SelectedItem as string;
 
+            var iconicOnly = chk_IconicOnly.Checked;
+
             var filtered = _items
                 .Where(x => type == null || type == AllTypes || x.Record.Type == type)
+                .Where(x => !iconicOnly || ResourceHelper.IsIconicWeapon((TweakDBID)x.Id))
                 .Where(x => terms.All(t => x.Label.Contains(t, StringComparison.CurrentCultureIgnoreCase)))
                 .ToArray();
 
@@ -113,6 +116,11 @@ namespace CP2077SaveEditor.Views
         }
 
         private void cb_Type_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FilterItems();
+        }
+
+        private void chk_IconicOnly_CheckedChanged(object sender, EventArgs e)
         {
             FilterItems();
         }

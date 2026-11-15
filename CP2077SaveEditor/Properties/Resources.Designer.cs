@@ -295,5 +295,11 @@ namespace CP2077SaveEditor.Properties {
                 return ResourceManager.GetString("CyberwareCatalogue", resourceCulture);
             }
         }
+
+        internal static string IconicWeapons {
+            get {
+                return ResourceManager.GetString("IconicWeapons", resourceCulture);
+            }
+        }
     }
 }

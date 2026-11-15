@@ -35,6 +35,7 @@
             lbl_Quantity = new System.Windows.Forms.Label();
             num_Quantity = new System.Windows.Forms.NumericUpDown();
             btn_Add = new System.Windows.Forms.Button();
+            chk_IconicOnly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)num_Quantity).BeginInit();
             SuspendLayout();
             //
@@ -44,7 +45,7 @@
             txt_Search.Location = new System.Drawing.Point(12, 12);
             txt_Search.Name = "txt_Search";
             txt_Search.PlaceholderText = "Search (e.g. Preset_Overture)";
-            txt_Search.Size = new System.Drawing.Size(290, 22);
+            txt_Search.Size = new System.Drawing.Size(200, 22);
             txt_Search.TabIndex = 0;
             txt_Search.TextChanged += txt_Search_TextChanged;
             txt_Search.KeyDown += txt_Search_KeyDown;
@@ -54,11 +55,23 @@
             cb_Type.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
             cb_Type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             cb_Type.FormattingEnabled = true;
-            cb_Type.Location = new System.Drawing.Point(308, 12);
+            cb_Type.Location = new System.Drawing.Point(218, 12);
             cb_Type.Name = "cb_Type";
-            cb_Type.Size = new System.Drawing.Size(140, 21);
+            cb_Type.Size = new System.Drawing.Size(136, 21);
             cb_Type.TabIndex = 1;
             cb_Type.SelectedIndexChanged += cb_Type_SelectedIndexChanged;
+            //
+            // chk_IconicOnly
+            //
+            chk_IconicOnly.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            chk_IconicOnly.AutoSize = true;
+            chk_IconicOnly.Location = new System.Drawing.Point(360, 14);
+            chk_IconicOnly.Name = "chk_IconicOnly";
+            chk_IconicOnly.Size = new System.Drawing.Size(88, 17);
+            chk_IconicOnly.TabIndex = 7;
+            chk_IconicOnly.Text = "Iconic only";
+            chk_IconicOnly.UseVisualStyleBackColor = true;
+            chk_IconicOnly.CheckedChanged += chk_IconicOnly_CheckedChanged;
             //
             // lb_Items
             //
@@ -126,6 +139,7 @@
             Controls.Add(lbl_Quantity);
             Controls.Add(lbl_Count);
             Controls.Add(lb_Items);
+            Controls.Add(chk_IconicOnly);
             Controls.Add(cb_Type);
             Controls.Add(txt_Search);
             Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -148,5 +162,6 @@
         private System.Windows.Forms.Label lbl_Quantity;
         private System.Windows.Forms.NumericUpDown num_Quantity;
         private System.Windows.Forms.Button btn_Add;
+        private System.Windows.Forms.CheckBox chk_IconicOnly;
     }
 }

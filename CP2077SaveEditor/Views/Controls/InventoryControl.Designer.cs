@@ -44,6 +44,7 @@
             btn_AddItem = new ModernButton();
             btn_CraftingComponents = new ModernButton();
             btn_MoveToStash = new ModernButton();
+            btn_AddMissingIconics = new ModernButton();
             clearQuestFlagsButton = new ModernButton();
             label2 = new System.Windows.Forms.Label();
             moneyUpDown = new System.Windows.Forms.NumericUpDown();
@@ -160,6 +161,7 @@
             // groupBox1
             // 
             groupBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            groupBox1.Controls.Add(btn_AddMissingIconics);
             groupBox1.Controls.Add(btn_AddItem);
             groupBox1.Controls.Add(btn_CraftingComponents);
             groupBox1.Controls.Add(btn_MoveToStash);
@@ -198,12 +200,28 @@
             btn_CraftingComponents.HoverColor = System.Drawing.Color.LightGray;
             btn_CraftingComponents.Location = new System.Drawing.Point(252, 56);
             btn_CraftingComponents.Name = "btn_CraftingComponents";
-            btn_CraftingComponents.Size = new System.Drawing.Size(157, 23);
+            btn_CraftingComponents.Size = new System.Drawing.Size(132, 23);
             btn_CraftingComponents.TabIndex = 9;
             btn_CraftingComponents.Text = "Crafting components...";
             btn_CraftingComponents.TextColor = System.Drawing.SystemColors.ControlText;
             btn_CraftingComponents.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             btn_CraftingComponents.Click += btn_CraftingComponents_Click;
+            //
+            // btn_AddMissingIconics
+            //
+            btn_AddMissingIconics.BackColor = System.Drawing.Color.White;
+            btn_AddMissingIconics.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            btn_AddMissingIconics.ClickEffectEnabled = true;
+            btn_AddMissingIconics.DefaultColor = System.Drawing.Color.White;
+            btn_AddMissingIconics.HoverColor = System.Drawing.Color.LightGray;
+            btn_AddMissingIconics.Location = new System.Drawing.Point(390, 56);
+            btn_AddMissingIconics.Name = "btn_AddMissingIconics";
+            btn_AddMissingIconics.Size = new System.Drawing.Size(130, 23);
+            btn_AddMissingIconics.TabIndex = 10;
+            btn_AddMissingIconics.Text = "Add Missing Iconics";
+            btn_AddMissingIconics.TextColor = System.Drawing.SystemColors.ControlText;
+            btn_AddMissingIconics.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btn_AddMissingIconics.Click += btn_AddMissingIconics_Click;
             // btn_MoveToStash
             //
             btn_MoveToStash.BackColor = System.Drawing.Color.White;
@@ -292,5 +310,6 @@
         private ModernButton btn_CraftingComponents;
         private ModernButton btn_AddItem;
         private ModernButton btn_MoveToStash;
+        private ModernButton btn_AddMissingIconics;
     }
 }

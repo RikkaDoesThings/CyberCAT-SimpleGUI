@@ -60,6 +60,7 @@ namespace CP2077SaveEditor.Views.Controls
             Theme.SetToolTip(toolTip, btn_AddItem, "Add any weapon, clothing, cyberware, mod or consumable to the selected container.");
             Theme.SetToolTip(toolTip, btn_MoveToStash, "Move the selected items (or all listed stashable items) between V's Inventory and V's Stash.");
             Theme.SetToolTip(toolTip, btn_CraftingComponents, "Edit quantities of all item and quickhack crafting components at once.");
+            Theme.SetToolTip(toolTip, btn_AddMissingIconics, "Add all iconic weapons missing from V's Inventory and Stash directly into V's Stash at Tier 5++.");
             Theme.SetToolTip(toolTip, clearQuestFlagsButton, "Remove Quest/NotUnequippable flags so locked items can be dropped, stashed or disassembled.");
         }
 
@@ -975,6 +976,41 @@ namespace CP2077SaveEditor.Views.Controls
             itemDialog.LoadDialog(_parentForm.ActiveSaveFile.GetInventory(ulong.Parse(containerID)), _parentForm.ActiveSaveFile);
 
             RefreshInventory();
+        }
+
+        private void btn_AddMissingIconics_Click(object sender, EventArgs e)
+        {
+            var missing = IconicWeaponsHelper.GetMissingIconicIds(_parentForm.ActiveSaveFile);
+            if (missing.Count == 0)
+            {
+                MessageBox.Show("You already own all iconic weapons in your Inventory or Stash.", "Add Missing Iconics", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (MessageBox.Show(
+                $"Add {missing.Count} missing iconic weapon(s) to V's Stash at Tier 5++?\n\nWeapons already present in V's Inventory or Stash will be skipped.",
+                "Add Missing Iconics",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var (added, stashCreated) = IconicWeaponsHelper.AddMissingIconicsToStash(_parentForm.ActiveSaveFile, makeMaxTier: true);
+            if (added > 0)
+            {
+                ChangeTracker.MarkChanged();
+                if (stashCreated)
+                {
+                    RefreshInventories();
+                }
+                else
+                {
+                    RefreshInventory();
+                }
+            }
+
+            MessageBox.Show($"Added {added} missing iconic weapon(s) to V's Stash.", "Add Missing Iconics", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

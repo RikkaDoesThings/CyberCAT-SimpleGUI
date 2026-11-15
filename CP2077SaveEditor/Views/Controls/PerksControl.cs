@@ -51,8 +51,22 @@ namespace CP2077SaveEditor.Views.Controls
 
             _points = new Label { AutoSize = true, Location = new Point(340, 8) };
 
+            var exportButton = new Button { Text = "Export Build...", AutoSize = true, Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            exportButton.Click += (_, _) => ExportBuild();
+            var importButton = new Button { Text = "Import Build...", AutoSize = true, Anchor = AnchorStyles.Top | AnchorStyles.Right };
+            importButton.Click += (_, _) => ImportBuild();
+
+            var buildButtons = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Right,
+                AutoSize = true,
+                WrapContents = false,
+                Padding = new Padding(0, 2, 0, 0)
+            };
+            buildButtons.Controls.AddRange(new Control[] { exportButton, importButton });
+
             var top = new Panel { Dock = DockStyle.Top, Height = 32 };
-            top.Controls.AddRange(new Control[] { _attribute, _usePoints, _points });
+            top.Controls.AddRange(new Control[] { _attribute, _usePoints, _points, buildButtons });
 
             _list = new ListView
             {
@@ -160,6 +174,86 @@ namespace CP2077SaveEditor.Views.Controls
             _list.EndUpdate();
 
             UpdatePoints();
+        }
+
+        private void ExportBuild()
+        {
+            using var dialog = new SaveFileDialog
+            {
+                Title = "Export Build Preset",
+                Filter = "Cyberpunk Build JSON (*.json)|*.json",
+                FileName = "build-preset.json"
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            var preset = BuildPresetHelper.Export(_parentForm.ActiveSaveFile, System.IO.Path.GetFileNameWithoutExtension(dialog.FileName));
+            System.IO.File.WriteAllText(dialog.FileName, BuildPresetHelper.Serialize(preset));
+            MessageBox.Show(
+                $"Build exported!\n\nAttributes: {preset.Attributes.Count}\nPerks: {preset.Perks.Count}\nCyberware: {preset.Cyberware.Count}",
+                "Export Build",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void ImportBuild()
+        {
+            using var dialog = new OpenFileDialog
+            {
+                Title = "Import Build Preset",
+                Filter = "Cyberpunk Build JSON (*.json)|*.json"
+            };
+
+            if (dialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            BuildPreset preset;
+            try
+            {
+                preset = BuildPresetHelper.Deserialize(System.IO.File.ReadAllText(dialog.FileName));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to read build file:\n{ex.Message}", "Import Build", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (preset == null)
+            {
+                MessageBox.Show("Invalid build preset file.", "Import Build", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (MessageBox.Show(
+                $"Import build \"{preset.Name ?? System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}\"?\n\n" +
+                $"Attributes: {preset.Attributes.Count}\nPerks: {preset.Perks.Count}\nCyberware: {preset.Cyberware.Count}\n\n" +
+                "Current perks and equipped cyberware will be replaced.",
+                "Import Build",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var result = BuildPresetHelper.Import(_parentForm.ActiveSaveFile, preset, _usePoints.Checked);
+            ChangeTracker.MarkChanged();
+            FillList();
+            UpdatePoints();
+
+            var warningText = result.Warnings.Count > 0
+                ? $"\n\nWarnings ({result.Warnings.Count}):\n- " + string.Join("\n- ", result.Warnings.Take(8))
+                : string.Empty;
+
+            MessageBox.Show(
+                $"Build imported!\n\nAttributes updated: {result.AttributesUpdated}\nPerks applied: {result.PerksApplied}\nCyberware equipped: {result.CyberwareEquipped} (created: {result.CyberwareCreated}){warningText}",
+                "Import Build",
+                MessageBoxButtons.OK,
+                result.Warnings.Count > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
 
         private void UpdatePoints()

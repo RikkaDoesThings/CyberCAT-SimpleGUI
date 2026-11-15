@@ -32,6 +32,13 @@ public record ModifierGroup(string Name, uint CRC, List<string> StatTypes);
 public static class ResourceHelper
 {
     public static readonly Dictionary<ulong, ItemRecord> ItemClasses = JsonSerializer.Deserialize<Dictionary<ulong, ItemRecord>>(Properties.Resources.ItemClasses);
+    private static readonly IconicWeaponsCatalog IconicWeaponsData = JsonSerializer.Deserialize<IconicWeaponsCatalog>(Properties.Resources.IconicWeapons);
+    public static readonly HashSet<ulong> IconicWeaponIds = IconicWeaponsData.All;
+    public static readonly IReadOnlyList<ulong> CanonicalIconicWeaponIds = IconicWeaponsData.Canonical;
+
+    public static bool IsIconicWeapon(TweakDBID id) => IconicWeaponIds.Contains((ulong)id);
+
+    private record IconicWeaponsCatalog(HashSet<ulong> All, List<ulong> Canonical);
     public static readonly List<FastTravelRecord> FastTravelRecords = JsonSerializer.Deserialize<List<FastTravelRecord>>(Properties.Resources.FastTravel);
     public static readonly List<ModifierGroup> ModifierGroups = JsonSerializer.Deserialize<List<ModifierGroup>>(Properties.Resources.ModifierGroups);
 
