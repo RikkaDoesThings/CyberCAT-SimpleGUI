@@ -255,6 +255,56 @@ namespace CP2077SaveEditor
             }
         }
 
+        private void stripModsButton_Click(object sender, EventArgs e)
+        {
+            if (activeItem?.ItemSlotPart == null)
+            {
+                return;
+            }
+
+            var removed = StripRemovableMods(activeItem.ItemSlotPart);
+            if (removed > 0)
+            {
+                ChangeTracker.MarkChanged();
+                ReloadData();
+                MessageBox.Show($"Removed {removed} weapon/scope/muzzle mod node(s).", "Strip Mods");
+            }
+            else
+            {
+                MessageBox.Show("No removable weapon/scope/muzzle mod nodes found on this item.", "Strip Mods");
+            }
+        }
+
+        private static int StripRemovableMods(ItemSlotPart parent)
+        {
+            if (parent.Children == null || parent.Children.Count == 0)
+            {
+                return 0;
+            }
+
+            var removed = 0;
+            for (var i = parent.Children.Count - 1; i >= 0; i--)
+            {
+                var child = parent.Children[i];
+                var slotName = child.AttachmentSlotTdbId.ResolvedText ?? string.Empty;
+                if (slotName.Contains("WeaponMod", StringComparison.OrdinalIgnoreCase) ||
+                    slotName.Contains("Scope", StringComparison.OrdinalIgnoreCase) ||
+                    slotName.Contains("PowerModule", StringComparison.OrdinalIgnoreCase) ||
+                    slotName.Contains("Muzzle", StringComparison.OrdinalIgnoreCase) ||
+                    slotName.Contains("Silencer", StringComparison.OrdinalIgnoreCase))
+                {
+                    parent.Children.RemoveAt(i);
+                    removed++;
+                }
+                else
+                {
+                    removed += StripRemovableMods(child);
+                }
+            }
+
+            return removed;
+        }
+
         private void applyButton_Click(object sender, EventArgs e)
         {
             if (!statsOnly)

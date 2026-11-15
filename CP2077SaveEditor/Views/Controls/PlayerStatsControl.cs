@@ -35,6 +35,8 @@ namespace CP2077SaveEditor.Views.Controls
 
             var toolTip = new ToolTip();
             Theme.SetToolTip(toolTip, additionalPlayerStatsButton, "Inspect and edit raw stat modifiers attached to V's entity.");
+            Theme.SetToolTip(toolTip, respecAttributesButton, "Reset all Core Attributes to 3 and refund the spent points into Attribute Points.");
+            Theme.SetToolTip(toolTip, maxAllSkillsButton, "Set all 5 Skill Progressions (Headhunter, Netrunner, Shinobi, Solo, Engineer) to level 60.");
 
             lifePathPictureBox.Paint += LifePathPictureBox_Paint;
             lifePathPictureBox.Resize += (_, _) => lifePathPictureBox.Invalidate();
@@ -422,6 +424,64 @@ namespace CP2077SaveEditor.Views.Controls
             g.DrawLine(yellowPen, 0, h - 1, 18, h - 1);
             g.DrawLine(yellowPen, w - 18, h - 1, w - 1, h - 1);
             g.DrawLine(yellowPen, w - 1, h - 18, w - 1, h - 1);
+        }
+
+        private void respecAttributesButton_Click(object sender, EventArgs e)
+        {
+            var refunded = _attributeFields.Values.Sum(x => Math.Max(0, (int)x.Value - 3));
+            if (refunded == 0)
+            {
+                MessageBox.Show("All Core Attributes are already at 3.", "Respec Attributes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (MessageBox.Show(
+                $"Reset all Core Attributes to 3 and refund {refunded} Attribute Point(s)?",
+                "Respec Attributes",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            _isLoading = true;
+            try
+            {
+                foreach (var numUpDown in _attributeFields.Values)
+                {
+                    numUpDown.Value = 3;
+                }
+
+                attrPointsUpDown.Value += refunded;
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+
+            PlayerStatChanged(this, EventArgs.Empty);
+        }
+
+        private void maxAllSkillsButton_Click(object sender, EventArgs e)
+        {
+            _isLoading = true;
+            try
+            {
+                foreach (var numUpDown in _proficiencyFields.Values)
+                {
+                    if (numUpDown.Maximum < 60)
+                    {
+                        numUpDown.Maximum = 60;
+                    }
+                    numUpDown.Value = 60;
+                }
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+
+            PlayerStatChanged(this, EventArgs.Empty);
         }
     }
 }

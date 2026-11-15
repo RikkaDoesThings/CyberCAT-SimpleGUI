@@ -22,6 +22,7 @@ namespace CP2077SaveEditor.Views.Controls
             var toolTip = new ToolTip();
             Theme.SetToolTip(toolTip, btn_UnlockAll, "Unlocks every fast travel terminal on the map, so you can travel there without discovering it first. Points already unlocked are kept.");
             Theme.SetToolTip(toolTip, btn_MakeVulnerable, "Removes the invulnerability (god mode) override from V, e.g. after using console commands.");
+            Theme.SetToolTip(toolTip, btn_CompareSaves, "Compare this save against another sav.dat (Attributes, Perks, Quest Facts, Inventory, Vehicles).");
             Theme.SetToolTip(toolTip, btn_ClearBlacklist, "Wardrobe Extra mod: shows the items you hid from the wardrobe again.");
         }
 
@@ -110,6 +111,12 @@ namespace CP2077SaveEditor.Views.Controls
 
             _parentForm.ActiveSaveFile.GetScriptableSystem<WardrobeSystemExtra>().Blacklist = null;
             ChangeTracker.MarkChanged();
+        }
+
+        private void btn_CompareSaves_Click(object sender, EventArgs e)
+        {
+            using var dialog = new SaveDiffDialog(_parentForm.ActiveSaveFile);
+            dialog.ShowDialog();
         }
     }
 }

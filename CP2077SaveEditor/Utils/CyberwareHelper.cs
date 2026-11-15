@@ -86,6 +86,29 @@ namespace CP2077SaveEditor.Utils
             slot.ItemID = new gameItemID();
         }
 
+        public int UpgradeEquippedToMaxTier()
+        {
+            var upgraded = 0;
+            foreach (var area in GetCyberwareAreas())
+            {
+                foreach (var slot in area.EquipSlots)
+                {
+                    if (slot.ItemID == null || (ulong)slot.ItemID.Id == 0)
+                    {
+                        continue;
+                    }
+
+                    var stats = _saveFile.GetStatsFromItemId(slot.ItemID);
+                    if (stats != null && _saveFile.SetMaxTier(stats))
+                    {
+                        upgraded++;
+                    }
+                }
+            }
+
+            return upgraded;
+        }
+
         public ItemData FindItem(gameItemID id) =>
             id == null || (ulong)id.Id == 0 ? null : _saveFile.GetInventory(1).Items.FirstOrDefault(x => IsSameItem(x.ItemInfo.ItemId, id));
 

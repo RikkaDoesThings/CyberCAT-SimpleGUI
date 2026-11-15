@@ -35,6 +35,8 @@ namespace CP2077SaveEditor.Views.Controls
             gb_Skills = new System.Windows.Forms.GroupBox();
             gb_LifePath = new System.Windows.Forms.GroupBox();
             additionalPlayerStatsButton = new ModernButton();
+            respecAttributesButton = new ModernButton();
+            maxAllSkillsButton = new ModernButton();
             soloUpDown = new System.Windows.Forms.NumericUpDown();
             shinobiUpDown = new System.Windows.Forms.NumericUpDown();
             netrunnerUpDown = new System.Windows.Forms.NumericUpDown();
@@ -159,6 +161,7 @@ namespace CP2077SaveEditor.Views.Controls
             gb_Attributes.Controls.Add(intelligenceUpDown);
             gb_Attributes.Controls.Add(label10);
             gb_Attributes.Controls.Add(coolUpDown);
+            gb_Attributes.Controls.Add(respecAttributesButton);
             gb_Attributes.Dock = System.Windows.Forms.DockStyle.Fill;
             gb_Attributes.Location = new System.Drawing.Point(4, 4);
             gb_Attributes.Margin = new System.Windows.Forms.Padding(4);
@@ -180,6 +183,7 @@ namespace CP2077SaveEditor.Views.Controls
             gb_Skills.Controls.Add(soloUpDown);
             gb_Skills.Controls.Add(label5);
             gb_Skills.Controls.Add(techieUpDown);
+            gb_Skills.Controls.Add(maxAllSkillsButton);
             gb_Skills.Dock = System.Windows.Forms.DockStyle.Fill;
             gb_Skills.Location = new System.Drawing.Point(287, 4);
             gb_Skills.Margin = new System.Windows.Forms.Padding(4);
@@ -395,6 +399,40 @@ namespace CP2077SaveEditor.Views.Controls
             additionalPlayerStatsButton.TextFont = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             additionalPlayerStatsButton.Click += additionalPlayerStatsButton_Click;
             // 
+            // respecAttributesButton
+            // 
+            respecAttributesButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            respecAttributesButton.BackColor = System.Drawing.Color.LightGray;
+            respecAttributesButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            respecAttributesButton.ClickEffectEnabled = true;
+            respecAttributesButton.DefaultColor = System.Drawing.Color.LightGray;
+            respecAttributesButton.HoverColor = System.Drawing.Color.Silver;
+            respecAttributesButton.Location = new System.Drawing.Point(14, 380);
+            respecAttributesButton.Name = "respecAttributesButton";
+            respecAttributesButton.Size = new System.Drawing.Size(247, 32);
+            respecAttributesButton.TabIndex = 19;
+            respecAttributesButton.Text = "Respec Attributes";
+            respecAttributesButton.TextColor = System.Drawing.SystemColors.ControlText;
+            respecAttributesButton.TextFont = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            respecAttributesButton.Click += respecAttributesButton_Click;
+            // 
+            // maxAllSkillsButton
+            // 
+            maxAllSkillsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            maxAllSkillsButton.BackColor = System.Drawing.Color.LightGray;
+            maxAllSkillsButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            maxAllSkillsButton.ClickEffectEnabled = true;
+            maxAllSkillsButton.DefaultColor = System.Drawing.Color.LightGray;
+            maxAllSkillsButton.HoverColor = System.Drawing.Color.Silver;
+            maxAllSkillsButton.Location = new System.Drawing.Point(14, 380);
+            maxAllSkillsButton.Name = "maxAllSkillsButton";
+            maxAllSkillsButton.Size = new System.Drawing.Size(247, 32);
+            maxAllSkillsButton.TabIndex = 20;
+            maxAllSkillsButton.Text = "Max All Skills (60)";
+            maxAllSkillsButton.TextColor = System.Drawing.SystemColors.ControlText;
+            maxAllSkillsButton.TextFont = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            maxAllSkillsButton.Click += maxAllSkillsButton_Click;
+            // 
             // label1
             // 
             label1.AutoSize = true;
@@ -592,6 +630,8 @@ namespace CP2077SaveEditor.Views.Controls
         private System.Windows.Forms.GroupBox gb_Skills;
         private System.Windows.Forms.GroupBox gb_LifePath;
         private ModernButton additionalPlayerStatsButton;
+        private ModernButton respecAttributesButton;
+        private ModernButton maxAllSkillsButton;
         private System.Windows.Forms.NumericUpDown techieUpDown;
         private System.Windows.Forms.NumericUpDown soloUpDown;
         private System.Windows.Forms.NumericUpDown shinobiUpDown;

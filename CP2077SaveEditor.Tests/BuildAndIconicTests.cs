@@ -124,4 +124,21 @@ public class BuildAndIconicTests
         Assert.Equal(0, BulkPackHelper.AddMissingIconicWeaponMods(reloaded));
         Assert.Equal(0, BulkPackHelper.AddMissingClothingSet(reloaded, "Johnny Silverhand", makeMaxTier: true).Added);
     }
+
+    [Fact]
+    public void Cyberware_UpgradeAllAndSaveDiff_RoundTrip()
+    {
+        var original = LoadSave();
+        var modified = Reload(original);
+
+        var cyberware = new CyberwareHelper(modified);
+        cyberware.UpgradeEquippedToMaxTier();
+        modified.SetFactByName("mq007_skippy_aim_at_head", 1);
+
+        var diff = SaveDiffHelper.Compare(original, modified);
+        Assert.Contains(diff.Entries, e => e.Category == "Quest Facts" && e.Name == "mq007_skippy_aim_at_head");
+
+        var reloaded = Reload(modified);
+        Assert.Equal(0, new CyberwareHelper(reloaded).UpgradeEquippedToMaxTier());
+    }
 }

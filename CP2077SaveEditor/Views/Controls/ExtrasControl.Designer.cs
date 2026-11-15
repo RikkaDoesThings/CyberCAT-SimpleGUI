@@ -30,6 +30,7 @@
         {
             gb_WardrobeExtra = new System.Windows.Forms.GroupBox();
             btn_ClearBlacklist = new ModernButton();
+            btn_CompareSaves = new ModernButton();
             btn_UnlockAll = new ModernButton();
             gb_Player = new System.Windows.Forms.GroupBox();
             btn_MakeVulnerable = new ModernButton();
@@ -86,6 +87,7 @@
             gb_Player.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             gb_Player.Controls.Add(btn_UnlockAll);
             gb_Player.Controls.Add(btn_MakeVulnerable);
+            gb_Player.Controls.Add(btn_CompareSaves);
             gb_Player.Enabled = false;
             gb_Player.Location = new System.Drawing.Point(3, 3);
             gb_Player.Name = "gb_Player";
@@ -110,6 +112,22 @@
             btn_MakeVulnerable.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             btn_MakeVulnerable.Click += btn_MakeVulnerable_Click;
             // 
+            // btn_CompareSaves
+            // 
+            btn_CompareSaves.BackColor = System.Drawing.Color.LightGray;
+            btn_CompareSaves.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            btn_CompareSaves.ClickEffectEnabled = true;
+            btn_CompareSaves.DefaultColor = System.Drawing.Color.LightGray;
+            btn_CompareSaves.HoverColor = System.Drawing.Color.Silver;
+            btn_CompareSaves.Location = new System.Drawing.Point(266, 22);
+            btn_CompareSaves.Name = "btn_CompareSaves";
+            btn_CompareSaves.Size = new System.Drawing.Size(165, 24);
+            btn_CompareSaves.TabIndex = 61;
+            btn_CompareSaves.Text = "Compare With Save...";
+            btn_CompareSaves.TextColor = System.Drawing.SystemColors.ControlText;
+            btn_CompareSaves.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btn_CompareSaves.Click += btn_CompareSaves_Click;
+            // 
             // ExtrasControl
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -127,6 +145,7 @@
 
         private System.Windows.Forms.GroupBox gb_WardrobeExtra;
         private ModernButton btn_ClearBlacklist;
+        private ModernButton btn_CompareSaves;
         private ModernButton btn_UnlockAll;
         private System.Windows.Forms.GroupBox gb_Player;
         private ModernButton btn_MakeVulnerable;

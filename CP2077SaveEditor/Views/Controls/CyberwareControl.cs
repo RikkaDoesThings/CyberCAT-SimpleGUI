@@ -283,8 +283,8 @@ namespace CP2077SaveEditor.Views.Controls
             // Bottom-left Capacity widget inside canvas
             _capacityInputPanel = new Panel
             {
-                Size = new Size(108, 92),
-                Location = new Point(6, 360),
+                Size = new Size(108, 122),
+                Location = new Point(6, 330),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Left
             };
 
@@ -346,13 +346,39 @@ namespace CP2077SaveEditor.Views.Controls
                 Font = new Font(Theme.UiFontFamily, 7f, FontStyle.Regular)
             };
 
-            _capacityInputPanel.Controls.AddRange(new Control[] { capTitle, _extraCapacity, maxCapBtn, applyCapBtn, capSubHint });
+            var upgradeAllBtn = new Button
+            {
+                Text = "ALL TIER 5++",
+                Size = new Size(103, 24),
+                Location = new Point(2, 92)
+            };
+            upgradeAllBtn.Click += (_, _) =>
+            {
+                if (_cyberware == null) return;
+                var upgraded = _cyberware.UpgradeEquippedToMaxTier();
+                if (upgraded > 0)
+                {
+                    ChangeTracker.MarkChanged();
+                    RebuildSlotCards();
+                    _canvas.Invalidate();
+                    _topSummaryBar.Invalidate();
+                }
+
+                MessageBox.Show(
+                    upgraded > 0 ? $"Upgraded {upgraded} equipped cyberware item(s) to Tier 5++." : "All equipped cyberware is already Tier 5++.",
+                    "Cyberware Tier 5++",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            };
+
+            _capacityInputPanel.Controls.AddRange(new Control[] { capTitle, _extraCapacity, maxCapBtn, applyCapBtn, capSubHint, upgradeAllBtn });
             _canvas.Controls.Add(_capacityInputPanel);
 
             var toolTip = new ToolTip();
             Theme.SetToolTip(toolTip, _extraCapacity, "Additive Humanity stat modifier added on top of V's base cyberware capacity.");
             Theme.SetToolTip(toolTip, applyCapBtn, "Apply the extra cyberware capacity modifier to V.");
             Theme.SetToolTip(toolTip, maxCapBtn, "Set extra cyberware capacity to +500 immediately.");
+            Theme.SetToolTip(toolTip, upgradeAllBtn, "Upgrade all currently equipped cyberware items to Tier 5++.");
             Theme.SetToolTip(toolTip, _equipButton, "Equip the chosen cyberware into the selected slot (creates the item if not in V's inventory).");
             Theme.SetToolTip(toolTip, _unequipButton, "Unequip the cyberware in the selected slot (the item stays in V's inventory).");
 

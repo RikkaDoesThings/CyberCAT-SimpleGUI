@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.37.0
+
+- **Respec Attributes & Max All Skills (`Player Stats` tab):** added **`Respec Attributes`** (resets Core Attributes to 3 and refunds all spent points into Attribute Points) and **`Max All Skills (60)`** (sets all 5 Skill Progressions to 60 in one click).
+- **Bulk Cyberware Upgrade (`Cyberware` tab):** added **`ALL TIER 5++`** to upgrade every currently equipped cyberware implant to Tier 5++ at once.
+- **Strip Weapon/Scope Mods (`ItemDetails` → `Mods` tab):** added **`Strip Weapon/Scope Mods`** to cleanly remove locked weapon mods, scopes, and muzzles without deleting base weapon parts.
+- **Save Diff / Compare Saves (`Extras` → `Compare With Save...`):** compare the active save against any other `sav.dat` across Attributes, Perks, Quest Facts, Player Inventory, and Vehicles, with live filtering, Copy, and `.txt` export.
+
 ## 0.36.0
 
 - **Wardrobe Clothing Sets, Quickhacks & Chimera Mods (`Inventory` → `Bulk Add ▾`):** added 1-click bulk packs to add missing **Iconic Quickhacks** (17), **Tier 5 Quickhacks** (17), **Iconic Weapon Mods / Chimera** (5), and **Wardrobe Clothing Sets** (Johnny Silverhand, MaxTac, GOG/Witcher Rewards, Phantom Liberty FIA/NUSA, Legendary Role Sets, V's Lifepath/Prologue) straight to V's Inventory or Stash.

@@ -59,6 +59,7 @@ namespace CP2077SaveEditor
             modInfoTab = new System.Windows.Forms.TabPage();
             newModNodeButton = new ModernButton();
             deleteModNodeButton = new ModernButton();
+            stripModsButton = new ModernButton();
             closeButton = new ModernButton();
             applyButton = new ModernButton();
             statsControl1 = new Views.Controls.StatsControl();
@@ -358,6 +359,7 @@ namespace CP2077SaveEditor
             // 
             // modInfoTab
             // 
+            modInfoTab.Controls.Add(stripModsButton);
             modInfoTab.Controls.Add(newModNodeButton);
             modInfoTab.Controls.Add(deleteModNodeButton);
             modInfoTab.Controls.Add(modsTreeView);
@@ -400,6 +402,22 @@ namespace CP2077SaveEditor
             deleteModNodeButton.TextColor = System.Drawing.SystemColors.ControlText;
             deleteModNodeButton.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             deleteModNodeButton.Click += deleteModNodeButton_Click;
+            // 
+            // stripModsButton
+            // 
+            stripModsButton.BackColor = System.Drawing.Color.White;
+            stripModsButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            stripModsButton.ClickEffectEnabled = true;
+            stripModsButton.DefaultColor = System.Drawing.Color.White;
+            stripModsButton.HoverColor = System.Drawing.Color.LightGray;
+            stripModsButton.Location = new System.Drawing.Point(117, 6);
+            stripModsButton.Name = "stripModsButton";
+            stripModsButton.Size = new System.Drawing.Size(182, 20);
+            stripModsButton.TabIndex = 8;
+            stripModsButton.Text = "Strip Weapon/Scope Mods";
+            stripModsButton.TextColor = System.Drawing.SystemColors.ControlText;
+            stripModsButton.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            stripModsButton.Click += stripModsButton_Click;
             // 
             // closeButton
             // 
@@ -496,6 +514,7 @@ namespace CP2077SaveEditor
         private System.Windows.Forms.TabPage statsTab;
         private ModernButton newModNodeButton;
         private ModernButton deleteModNodeButton;
+        private ModernButton stripModsButton;
         private System.Windows.Forms.TabPage statsPlaceholderTab;
         private System.Windows.Forms.Label label3;
         private ModernButton createStatDataButton;
