@@ -51,7 +51,7 @@ namespace ResourceGenerator
             if (generators.Remove("all"))
             {
                 // "mods" is left out, the editor doesn't use Mods.json
-                generators.UnionWith(new[] { "vehicles", "items", "modifiergroups", "names", "perks", "cyberware", "iconicweapons" });
+                generators.UnionWith(new[] { "vehicles", "items", "modifiergroups", "names", "perks", "cyberware", "iconicweapons", "quickhacksmods", "clothingsets" });
             }
 
             Console.WriteLine($"Writing {string.Join(", ", generators)} to {Directory.GetCurrentDirectory()}");
@@ -101,6 +101,8 @@ namespace ResourceGenerator
             if (generators.Contains("perks")) GeneratePerks(tweakDb!, gameDir);
             if (generators.Contains("cyberware")) GenerateCyberware(tweakDb!);
             if (generators.Contains("iconicweapons")) GenerateIconicWeapons(tweakDb!);
+            if (generators.Contains("quickhacksmods")) GenerateQuickhacksAndMods(tweakDb!);
+            if (generators.Contains("clothingsets")) GenerateClothingSets(tweakDb!);
         }
 
         // Writes Cyberware.json: { item hash: equipment area } for every cyberware item, e.g. "EyesCW"
@@ -616,6 +618,155 @@ namespace ResourceGenerator
 
             File.WriteAllText("IconicWeapons.json", JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
             Console.WriteLine($"Generated IconicWeapons.json: {allIconics.Count} total, {canonical.Count} canonical.");
+        }
+
+        private static void GenerateQuickhacksAndMods(TweakDB tweakDb)
+        {
+            var displayNames = JsonSerializer.Deserialize<Dictionary<string, Dictionary<ulong, string>>>(
+                File.ReadAllText("DisplayNames.json"))!["en-us"];
+
+            var iconicQuickhacks = new Dictionary<string, (ulong Id, string Resolved)>();
+            var tier5Quickhacks = new Dictionary<string, (ulong Id, string Resolved)>();
+            var iconicWeaponMods = new Dictionary<string, (ulong Id, string Resolved)>();
+
+            foreach (var (id, type) in tweakDb.Records)
+            {
+                if (!type.IsAssignableTo(typeof(gamedataItem_Record)) || tweakDb.GetFullRecord(id) is not gamedataItem_Record record)
+                {
+                    continue;
+                }
+
+                var resolved = ((TweakDBID)id).GetResolvedText();
+                if (resolved == null || !displayNames.TryGetValue(id, out var name) || string.IsNullOrWhiteSpace(name))
+                {
+                    continue;
+                }
+
+                if (name.StartsWith("!OBSOLETE", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var quality = record.Quality.GetResolvedText();
+                var isProgram = record.ItemType.GetResolvedText() == "ItemType.Prt_Program";
+                var isWeaponMod = record.Tags != null && record.Tags.Any(t => t == "WeaponMod");
+
+                if (isProgram)
+                {
+                    // Iconic quickhacks in 2.0+ use Lvl4PlusPlusProgram or Quality.Iconic
+                    if (quality == "Quality.Iconic" || resolved.Contains("Lvl4PlusPlusProgram", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!iconicQuickhacks.ContainsKey(name))
+                        {
+                            iconicQuickhacks[name] = (id, resolved);
+                        }
+                    }
+                    else if (quality == "Quality.Legendary" && resolved.EndsWith("Lvl4Program", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!tier5Quickhacks.ContainsKey(name))
+                        {
+                            tier5Quickhacks[name] = (id, resolved);
+                        }
+                    }
+                }
+                else if (isWeaponMod && (quality == "Quality.Iconic" ||
+                    (record.Tags != null && record.Tags.Any(t => (t.GetResolvedText() ?? string.Empty).Contains("Iconic", StringComparison.OrdinalIgnoreCase) || (t.GetResolvedText() ?? string.Empty).Contains("Chimera", StringComparison.OrdinalIgnoreCase))) ||
+                    resolved.Contains("Chimera", StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (!iconicWeaponMods.ContainsKey(name))
+                    {
+                        iconicWeaponMods[name] = (id, resolved);
+                    }
+                }
+            }
+
+            var payload = new
+            {
+                IconicQuickhacks = iconicQuickhacks.OrderBy(x => x.Key).Select(x => x.Value.Id).ToList(),
+                Tier5Quickhacks = tier5Quickhacks.OrderBy(x => x.Key).Select(x => x.Value.Id).ToList(),
+                IconicWeaponMods = iconicWeaponMods.OrderBy(x => x.Key).Select(x => x.Value.Id).ToList()
+            };
+
+            File.WriteAllText("QuickhacksAndMods.json", JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine($"Generated QuickhacksAndMods.json: {payload.IconicQuickhacks.Count} iconic quickhacks, {payload.Tier5Quickhacks.Count} tier5 quickhacks, {payload.IconicWeaponMods.Count} iconic mods.");
+        }
+
+        private static void GenerateClothingSets(TweakDB tweakDb)
+        {
+            var displayNames = JsonSerializer.Deserialize<Dictionary<string, Dictionary<ulong, string>>>(
+                File.ReadAllText("DisplayNames.json"))!["en-us"];
+
+            var sets = new SortedDictionary<string, List<ulong>>(StringComparer.Ordinal);
+            var seenNames = new Dictionary<string, HashSet<string>>(StringComparer.Ordinal);
+
+            void AddToSet(string setName, ulong id, string itemName)
+            {
+                if (!sets.TryGetValue(setName, out var list))
+                {
+                    list = new List<ulong>();
+                    sets[setName] = list;
+                    seenNames[setName] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                if (seenNames[setName].Add(itemName))
+                {
+                    list.Add(id);
+                }
+            }
+
+            foreach (var (id, type) in tweakDb.Records.OrderBy(x => x.id.GetResolvedText() ?? string.Empty))
+            {
+                if (!type.IsAssignableTo(typeof(gamedataClothing_Record)) || tweakDb.GetFullRecord(id) is not gamedataClothing_Record record)
+                {
+                    continue;
+                }
+
+                var resolved = ((TweakDBID)id).GetResolvedText();
+                if (resolved == null || !displayNames.TryGetValue(id, out var name) || string.IsNullOrWhiteSpace(name))
+                {
+                    continue;
+                }
+
+                if (name.StartsWith("!OBSOLETE", StringComparison.OrdinalIgnoreCase) || resolved.Contains("_NPC", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var isIconic = record.Quality == "Quality.Iconic" ||
+                               (record.Tags != null && record.Tags.Any(t => (t.GetResolvedText() ?? string.Empty).Contains("Iconic", StringComparison.OrdinalIgnoreCase)));
+
+                if (resolved.Contains("Johnny", StringComparison.OrdinalIgnoreCase) || resolved.Contains("Samurai_Jacket", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("Johnny Silverhand", id, name);
+                }
+                else if (resolved.Contains("MaxTac", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("MaxTac", id, name);
+                }
+                else if (resolved.Contains("GOG", StringComparison.OrdinalIgnoreCase) || resolved.Contains("Twitch_Drop", StringComparison.OrdinalIgnoreCase) || resolved.Contains("Reward", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("GOG / Witcher / Rewards", id, name);
+                }
+                else if (resolved.Contains("_Set_", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("Legendary Role Sets (Solo / Netrunner / Techie...)", id, name);
+                }
+                else if (resolved.Contains("Q30", StringComparison.OrdinalIgnoreCase) || resolved.Contains("FIA", StringComparison.OrdinalIgnoreCase) || resolved.Contains("NUSA", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("Phantom Liberty (FIA / NUSA)", id, name);
+                }
+                else if (resolved.StartsWith("Items.Q000_", StringComparison.OrdinalIgnoreCase) || resolved.StartsWith("Items.Q001_", StringComparison.OrdinalIgnoreCase) || resolved.StartsWith("Items.Q005_", StringComparison.OrdinalIgnoreCase))
+                {
+                    AddToSet("V's Lifepath & Prologue", id, name);
+                }
+                else if (isIconic)
+                {
+                    AddToSet("Other Iconic Clothing", id, name);
+                }
+            }
+
+            File.WriteAllText("ClothingSets.json", JsonSerializer.Serialize(sets, new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine($"Generated ClothingSets.json: {sets.Count} sets, {sets.Values.Sum(x => x.Count)} items total.");
         }
 
         public class ItemRecord2

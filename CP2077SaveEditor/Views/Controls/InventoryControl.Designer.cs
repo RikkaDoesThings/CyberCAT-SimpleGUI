@@ -218,7 +218,7 @@
             btn_AddMissingIconics.Name = "btn_AddMissingIconics";
             btn_AddMissingIconics.Size = new System.Drawing.Size(130, 23);
             btn_AddMissingIconics.TabIndex = 10;
-            btn_AddMissingIconics.Text = "Add Missing Iconics";
+            btn_AddMissingIconics.Text = "Bulk Add ▾";
             btn_AddMissingIconics.TextColor = System.Drawing.SystemColors.ControlText;
             btn_AddMissingIconics.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             btn_AddMissingIconics.Click += btn_AddMissingIconics_Click;

@@ -36,6 +36,7 @@ namespace CP2077SaveEditor
             modsTreeView = new System.Windows.Forms.TreeView();
             quickActionsGroupBox = new System.Windows.Forms.GroupBox();
             pasteLegendaryIdButton = new ModernButton();
+            unlockAndMaxTierButton = new ModernButton();
             questItemCheckBox = new System.Windows.Forms.CheckBox();
             flagsGroupBox = new System.Windows.Forms.GroupBox();
             unknownFlag1CheckBox = new System.Windows.Forms.CheckBox();
@@ -111,6 +112,7 @@ namespace CP2077SaveEditor
             // quickActionsGroupBox
             // 
             quickActionsGroupBox.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left;
+            quickActionsGroupBox.Controls.Add(unlockAndMaxTierButton);
             quickActionsGroupBox.Controls.Add(pasteLegendaryIdButton);
             quickActionsGroupBox.Location = new System.Drawing.Point(12, 138);
             quickActionsGroupBox.Name = "quickActionsGroupBox";
@@ -134,6 +136,22 @@ namespace CP2077SaveEditor
             pasteLegendaryIdButton.TextColor = System.Drawing.SystemColors.ControlText;
             pasteLegendaryIdButton.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             pasteLegendaryIdButton.Click += pasteLegendaryIdButton_Click;
+            // 
+            // unlockAndMaxTierButton
+            // 
+            unlockAndMaxTierButton.BackColor = System.Drawing.Color.White;
+            unlockAndMaxTierButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            unlockAndMaxTierButton.ClickEffectEnabled = true;
+            unlockAndMaxTierButton.DefaultColor = System.Drawing.Color.White;
+            unlockAndMaxTierButton.HoverColor = System.Drawing.Color.LightGray;
+            unlockAndMaxTierButton.Location = new System.Drawing.Point(214, 21);
+            unlockAndMaxTierButton.Name = "unlockAndMaxTierButton";
+            unlockAndMaxTierButton.Size = new System.Drawing.Size(210, 24);
+            unlockAndMaxTierButton.TabIndex = 3;
+            unlockAndMaxTierButton.Text = "Unlock + Tier 5++";
+            unlockAndMaxTierButton.TextColor = System.Drawing.SystemColors.ControlText;
+            unlockAndMaxTierButton.TextFont = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            unlockAndMaxTierButton.Click += unlockAndMaxTierButton_Click;
             // 
             // questItemCheckBox
             // 
@@ -465,6 +483,7 @@ namespace CP2077SaveEditor
         private System.Windows.Forms.NumericUpDown quantityUpDown;
         private System.Windows.Forms.Label label1;
         private ModernButton pasteLegendaryIdButton;
+        private ModernButton unlockAndMaxTierButton;
         private ModernButton applyButton;
         private ModernButton closeButton;
         private System.Windows.Forms.GroupBox quickActionsGroupBox;

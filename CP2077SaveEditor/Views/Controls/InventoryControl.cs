@@ -60,7 +60,7 @@ namespace CP2077SaveEditor.Views.Controls
             Theme.SetToolTip(toolTip, btn_AddItem, "Add any weapon, clothing, cyberware, mod or consumable to the selected container.");
             Theme.SetToolTip(toolTip, btn_MoveToStash, "Move the selected items (or all listed stashable items) between V's Inventory and V's Stash.");
             Theme.SetToolTip(toolTip, btn_CraftingComponents, "Edit quantities of all item and quickhack crafting components at once.");
-            Theme.SetToolTip(toolTip, btn_AddMissingIconics, "Add all iconic weapons missing from V's Inventory and Stash directly into V's Stash at Tier 5++.");
+            Theme.SetToolTip(toolTip, btn_AddMissingIconics, "Bulk-add missing Iconic Weapons, Iconic/Tier 5 Quickhacks, Chimera Weapon Mods, or Wardrobe Clothing Sets.");
             Theme.SetToolTip(toolTip, clearQuestFlagsButton, "Remove Quest/NotUnequippable flags so locked items can be dropped, stashed or disassembled.");
         }
 
@@ -980,6 +980,30 @@ namespace CP2077SaveEditor.Views.Controls
 
         private void btn_AddMissingIconics_Click(object sender, EventArgs e)
         {
+            var menu = new ContextMenuStrip();
+            menu.Items.Add("Add Missing Iconic Weapons to Stash (Tier 5++)", null, (_, _) => AddMissingIconicWeapons());
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("Add Missing Iconic Quickhacks", null, (_, _) => AddBulkQuickhacks(iconic: true));
+            menu.Items.Add("Add Missing Tier 5 Quickhacks", null, (_, _) => AddBulkQuickhacks(iconic: false));
+            menu.Items.Add("Add Missing Iconic Weapon Mods (Chimera)", null, (_, _) => AddBulkIconicMods());
+            menu.Items.Add(new ToolStripSeparator());
+
+            var clothingMenu = new ToolStripMenuItem("Add Missing Clothing Sets to Stash (Wardrobe)");
+            clothingMenu.DropDownItems.Add("All Clothing Sets", null, (_, _) => AddBulkClothingSet(null, "All Clothing Sets"));
+            clothingMenu.DropDownItems.Add(new ToolStripSeparator());
+            foreach (var setName in ResourceHelper.ClothingSets.Keys)
+            {
+                var captured = setName;
+                clothingMenu.DropDownItems.Add($"{captured} ({ResourceHelper.ClothingSets[captured].Count})", null, (_, _) => AddBulkClothingSet(captured, captured));
+            }
+            menu.Items.Add(clothingMenu);
+
+            Theme.Apply(menu);
+            menu.Show(btn_AddMissingIconics, new System.Drawing.Point(0, btn_AddMissingIconics.Height));
+        }
+
+        private void AddMissingIconicWeapons()
+        {
             var missing = IconicWeaponsHelper.GetMissingIconicIds(_parentForm.ActiveSaveFile);
             if (missing.Count == 0)
             {
@@ -1011,6 +1035,64 @@ namespace CP2077SaveEditor.Views.Controls
             }
 
             MessageBox.Show($"Added {added} missing iconic weapon(s) to V's Stash.", "Add Missing Iconics", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void AddBulkQuickhacks(bool iconic)
+        {
+            var added = BulkPackHelper.AddMissingQuickhacks(_parentForm.ActiveSaveFile, iconic);
+            if (added > 0)
+            {
+                ChangeTracker.MarkChanged();
+                RefreshInventory();
+            }
+
+            var label = iconic ? "Iconic Quickhack(s)" : "Tier 5 Quickhack(s)";
+            MessageBox.Show(
+                added > 0 ? $"Added {added} missing {label} to V's Inventory." : $"You already own all {label}.",
+                "Quickhacks",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void AddBulkIconicMods()
+        {
+            var added = BulkPackHelper.AddMissingIconicWeaponMods(_parentForm.ActiveSaveFile);
+            if (added > 0)
+            {
+                ChangeTracker.MarkChanged();
+                RefreshInventory();
+            }
+
+            MessageBox.Show(
+                added > 0 ? $"Added {added} missing Iconic Weapon Mod(s) to V's Inventory." : "You already own all Iconic Weapon Mods.",
+                "Iconic Weapon Mods",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+
+        private void AddBulkClothingSet(string setName, string displayLabel)
+        {
+            var (added, stashCreated) = BulkPackHelper.AddMissingClothingSet(_parentForm.ActiveSaveFile, setName, makeMaxTier: true);
+            if (added > 0)
+            {
+                ChangeTracker.MarkChanged();
+                if (stashCreated)
+                {
+                    RefreshInventories();
+                }
+                else
+                {
+                    RefreshInventory();
+                }
+            }
+
+            MessageBox.Show(
+                added > 0
+                    ? $"Added {added} missing clothing item(s) from \"{displayLabel}\" to V's Stash (Wardrobe unlocked)."
+                    : $"You already own all clothing items from \"{displayLabel}\".",
+                "Clothing Sets",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
     }
 }

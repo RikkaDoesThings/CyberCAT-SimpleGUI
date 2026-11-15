@@ -32,6 +32,8 @@ namespace CP2077SaveEditor.Views.Controls
             this.factsSaveButton = new CP2077SaveEditor.ModernButton();
             this.enableSecretEndingButton = new CP2077SaveEditor.ModernButton();
             this.addFactButton = new CP2077SaveEditor.ModernButton();
+            this.presetsButton = new CP2077SaveEditor.ModernButton();
+            this.importFactsButton = new CP2077SaveEditor.ModernButton();
             this.factsSearchBox = new System.Windows.Forms.TextBox();
             this.factsListView = new System.Windows.Forms.ListView();
             this.factsValueHeader = new System.Windows.Forms.ColumnHeader();
@@ -85,6 +87,39 @@ namespace CP2077SaveEditor.Views.Controls
             this.addFactButton.TextColor = System.Drawing.SystemColors.ControlText;
             this.addFactButton.TextFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.addFactButton.Click += new System.EventHandler(this.addFactButton_Click);
+            // 
+            // presetsButton
+            // 
+            this.presetsButton.BackColor = System.Drawing.Color.White;
+            this.presetsButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.presetsButton.ClickEffectEnabled = true;
+            this.presetsButton.DefaultColor = System.Drawing.Color.White;
+            this.presetsButton.HoverColor = System.Drawing.Color.LightGray;
+            this.presetsButton.Location = new System.Drawing.Point(508, 6);
+            this.presetsButton.Name = "presetsButton";
+            this.presetsButton.Size = new System.Drawing.Size(105, 28);
+            this.presetsButton.TabIndex = 8;
+            this.presetsButton.Text = "Presets ▾";
+            this.presetsButton.TextColor = System.Drawing.SystemColors.ControlText;
+            this.presetsButton.TextFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.presetsButton.Click += new System.EventHandler(this.presetsButton_Click);
+            // 
+            // importFactsButton
+            // 
+            this.importFactsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.importFactsButton.BackColor = System.Drawing.Color.White;
+            this.importFactsButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.importFactsButton.ClickEffectEnabled = true;
+            this.importFactsButton.DefaultColor = System.Drawing.Color.White;
+            this.importFactsButton.HoverColor = System.Drawing.Color.LightGray;
+            this.importFactsButton.Location = new System.Drawing.Point(619, 6);
+            this.importFactsButton.Name = "importFactsButton";
+            this.importFactsButton.Size = new System.Drawing.Size(100, 28);
+            this.importFactsButton.TabIndex = 9;
+            this.importFactsButton.Text = "Import JSON";
+            this.importFactsButton.TextColor = System.Drawing.SystemColors.ControlText;
+            this.importFactsButton.TextFont = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.importFactsButton.Click += new System.EventHandler(this.importFactsButton_Click);
             // 
             // factsSaveButton
             // 
@@ -160,6 +195,8 @@ namespace CP2077SaveEditor.Views.Controls
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.factsListView);
             this.Controls.Add(this.factsSearchBox);
+            this.Controls.Add(this.importFactsButton);
+            this.Controls.Add(this.presetsButton);
             this.Controls.Add(this.addFactButton);
             this.Controls.Add(this.enableSecretEndingButton);
             this.Controls.Add(this.factsSaveButton);
@@ -177,6 +214,8 @@ namespace CP2077SaveEditor.Views.Controls
         private ModernButton factsSaveButton;
         private ModernButton enableSecretEndingButton;
         private ModernButton addFactButton;
+        private ModernButton presetsButton;
+        private ModernButton importFactsButton;
         private System.Windows.Forms.TextBox factsSearchBox;
         private System.Windows.Forms.ListView factsListView;
         private System.Windows.Forms.ColumnHeader factsValueHeader;

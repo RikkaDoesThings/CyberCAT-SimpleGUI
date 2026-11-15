@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.36.0
+
+- **Wardrobe Clothing Sets, Quickhacks & Chimera Mods (`Inventory` → `Bulk Add ▾`):** added 1-click bulk packs to add missing **Iconic Quickhacks** (17), **Tier 5 Quickhacks** (17), **Iconic Weapon Mods / Chimera** (5), and **Wardrobe Clothing Sets** (Johnny Silverhand, MaxTac, GOG/Witcher Rewards, Phantom Liberty FIA/NUSA, Legendary Role Sets, V's Lifepath/Prologue) straight to V's Inventory or Stash.
+- **Save Browser Batch Management (`Saves` tab):** added **Lifepath filter**, **multi-select**, **`Delete Selected`**, and **`Clean Autosaves...`** (keeps the 5 newest autosaves and safely sends older ones to the Windows Recycle Bin).
+- **Quest Facts Presets & Import (`Quest Facts` tab):** added **`Presets ▾`** (including Skippy mode switchers *Stone Cold Killer* / *Puppy-Loving Pacifist*, Secret Ending, and Romance flags) plus **`Import JSON`** to restore exported quest fact files.
+- **`ItemDetails` Quick Action:** added **`Unlock + Tier 5++`** to clear Quest/NotUnequippable flags and upgrade an item to Tier 5++ in one click.
+
 ## 0.35.0
 
 - **Iconic Weapons Filter & Bulk Stash (`Add Item` & `Inventory`):** added an **Iconic only** filter checkbox in the `Add Item` dialog covering all 358 iconic weapon presets from TweakDB, plus an **Add Missing Iconics** quick action in the Inventory tab that checks both V's Inventory and Stash and adds every missing iconic weapon (115 unique weapons) directly to V's Stash at Tier 5++.

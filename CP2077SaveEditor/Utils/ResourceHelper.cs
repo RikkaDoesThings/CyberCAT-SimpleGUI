@@ -35,10 +35,13 @@ public static class ResourceHelper
     private static readonly IconicWeaponsCatalog IconicWeaponsData = JsonSerializer.Deserialize<IconicWeaponsCatalog>(Properties.Resources.IconicWeapons);
     public static readonly HashSet<ulong> IconicWeaponIds = IconicWeaponsData.All;
     public static readonly IReadOnlyList<ulong> CanonicalIconicWeaponIds = IconicWeaponsData.Canonical;
+    public static readonly QuickhacksAndModsCatalog QuickhacksAndMods = JsonSerializer.Deserialize<QuickhacksAndModsCatalog>(Properties.Resources.QuickhacksAndMods);
+    public static readonly Dictionary<string, List<ulong>> ClothingSets = JsonSerializer.Deserialize<Dictionary<string, List<ulong>>>(Properties.Resources.ClothingSets);
 
     public static bool IsIconicWeapon(TweakDBID id) => IconicWeaponIds.Contains((ulong)id);
 
     private record IconicWeaponsCatalog(HashSet<ulong> All, List<ulong> Canonical);
+    public record QuickhacksAndModsCatalog(List<ulong> IconicQuickhacks, List<ulong> Tier5Quickhacks, List<ulong> IconicWeaponMods);
     public static readonly List<FastTravelRecord> FastTravelRecords = JsonSerializer.Deserialize<List<FastTravelRecord>>(Properties.Resources.FastTravel);
     public static readonly List<ModifierGroup> ModifierGroups = JsonSerializer.Deserialize<List<ModifierGroup>>(Properties.Resources.ModifierGroups);
 

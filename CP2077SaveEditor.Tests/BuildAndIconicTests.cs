@@ -104,4 +104,24 @@ public class BuildAndIconicTests
         Assert.Equal(exported.Perks, reExported.Perks);
         Assert.Equal(exported.Cyberware.Count, reExported.Cyberware.Count);
     }
+
+    [Fact]
+    public void BulkPacks_QuickhacksModsAndClothingSets_RoundTrip()
+    {
+        var save = LoadSave();
+
+        Assert.True(ResourceHelper.QuickhacksAndMods.IconicQuickhacks.Count >= 10);
+        Assert.True(ResourceHelper.QuickhacksAndMods.Tier5Quickhacks.Count >= 10);
+        Assert.True(ResourceHelper.QuickhacksAndMods.IconicWeaponMods.Count >= 4);
+        Assert.True(ResourceHelper.ClothingSets.Count >= 5);
+
+        BulkPackHelper.AddMissingQuickhacks(save, iconic: true);
+        BulkPackHelper.AddMissingIconicWeaponMods(save);
+        BulkPackHelper.AddMissingClothingSet(save, "Johnny Silverhand", makeMaxTier: true);
+
+        var reloaded = Reload(save);
+        Assert.Equal(0, BulkPackHelper.AddMissingQuickhacks(reloaded, iconic: true));
+        Assert.Equal(0, BulkPackHelper.AddMissingIconicWeaponMods(reloaded));
+        Assert.Equal(0, BulkPackHelper.AddMissingClothingSet(reloaded, "Johnny Silverhand", makeMaxTier: true).Added);
+    }
 }

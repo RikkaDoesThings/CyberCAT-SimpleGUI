@@ -230,6 +230,31 @@ namespace CP2077SaveEditor
             }
         }
 
+        private void unlockAndMaxTierButton_Click(object sender, EventArgs e)
+        {
+            if (activeItem == null)
+            {
+                return;
+            }
+
+            var flagsChanged = activeItem.Flags.HasFlag(ItemFlag.IsQuestItem) || activeItem.Flags.HasFlag(ItemFlag.IsNotUnequippable);
+            activeItem.Flags &= ~(ItemFlag.IsQuestItem | ItemFlag.IsNotUnequippable);
+
+            var statData = activeSaveFile.GetStatsFromItemId(activeItem.ItemInfo.ItemId);
+            var tierChanged = statData != null && activeSaveFile.SetMaxTier(statData);
+
+            if (flagsChanged || tierChanged)
+            {
+                ChangeTracker.MarkChanged();
+                ReloadData();
+                MessageBox.Show("Item unlocked (Quest/NotUnequippable flags cleared) and set to Tier 5++.", "Unlock + Tier 5++");
+            }
+            else
+            {
+                MessageBox.Show("Item is already unlocked and Tier 5++.", "Unlock + Tier 5++");
+            }
+        }
+
         private void applyButton_Click(object sender, EventArgs e)
         {
             if (!statsOnly)

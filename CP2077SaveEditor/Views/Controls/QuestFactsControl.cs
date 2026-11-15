@@ -26,6 +26,8 @@ namespace CP2077SaveEditor.Views.Controls
             Theme.SetToolTip(toolTip, enableSecretEndingButton, "Sets sq032_johnny_friend = 1 so Johnny's secret ending ('Don't Fear the Reaper') is available in Nocturne Op55N1.");
             Theme.SetToolTip(toolTip, makeAllRomanceableButton, "Sets the romanceable flags for Judy, Panam, River and Kerry regardless of V's gender.");
             Theme.SetToolTip(toolTip, addFactButton, "Add a new quest fact entry by name or hash.");
+            Theme.SetToolTip(toolTip, presetsButton, "Apply common safe quest fact presets (e.g. Skippy mode).");
+            Theme.SetToolTip(toolTip, importFactsButton, "Import quest facts from a JSON file previously exported with 'Export to Text'.");
             Theme.SetToolTip(toolTip, factsSaveButton, "Export all known quest facts and their current values to a JSON text file.");
         }
 
@@ -173,6 +175,73 @@ namespace CP2077SaveEditor.Views.Controls
             MessageBox.Show("Romance flags set for Judy, River, Panam and Kerry." + Environment.NewLine + Environment.NewLine +
                             "The game still checks V's body and voice in some romance scenes, so a romance outside the vanilla " +
                             "rules (for example Panam with a female V) also needs a romance mod.");
+        }
+
+        private void presetsButton_Click(object sender, EventArgs e)
+        {
+            var menu = new ContextMenuStrip();
+            menu.Items.Add("Skippy: Stone Cold Killer (Headshots)", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("mq007_skippy_aim_at_head", 1);
+                _parentForm.ActiveSaveFile.SetFactByName("mq007_skippy_goes_to_regina", 0);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Skippy set to Stone Cold Killer mode (headshots).", "Quest Facts Preset");
+            });
+            menu.Items.Add("Skippy: Puppy-Loving Pacifist (Limbs)", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("mq007_skippy_aim_at_head", 0);
+                _parentForm.ActiveSaveFile.SetFactByName("mq007_skippy_goes_to_regina", 0);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Skippy set to Puppy-Loving Pacifist mode (limbs).", "Quest Facts Preset");
+            });
+            menu.Items.Add("Secret Ending ('Don't Fear the Reaper')", null, enableSecretEndingButton_Click);
+            menu.Items.Add("Make All Characters Romanceable", null, makeAllRomanceableButton_Click);
+            Theme.Apply(menu);
+            menu.Show(presetsButton, new Point(0, presetsButton.Height));
+        }
+
+        private void importFactsButton_Click(object sender, EventArgs e)
+        {
+            using var openDialog = new OpenFileDialog
+            {
+                Title = "Import Quest Facts JSON",
+                Filter = "JSON File (*.json)|*.json|All Files (*.*)|*.*"
+            };
+
+            if (openDialog.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+
+            try
+            {
+                var entries = System.Text.Json.JsonSerializer.Deserialize<List<KeyValuePair<string, uint>>>(File.ReadAllText(openDialog.FileName));
+                if (entries == null || entries.Count == 0)
+                {
+                    MessageBox.Show("No quest facts found in the selected file.", "Import Quest Facts", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                if (MessageBox.Show($"Apply {entries.Count} quest fact(s) from \"{Path.GetFileName(openDialog.FileName)}\"?", "Import Quest Facts", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                {
+                    return;
+                }
+
+                foreach (var entry in entries)
+                {
+                    _parentForm.ActiveSaveFile.SetFactByName(entry.Key, entry.Value);
+                }
+
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show($"Imported {entries.Count} quest fact(s).", "Import Quest Facts", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to import quest facts:\n{ex.Message}", "Import Quest Facts", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

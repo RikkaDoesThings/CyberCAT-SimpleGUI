@@ -301,5 +301,17 @@ namespace CP2077SaveEditor.Properties {
                 return ResourceManager.GetString("IconicWeapons", resourceCulture);
             }
         }
+
+        internal static string QuickhacksAndMods {
+            get {
+                return ResourceManager.GetString("QuickhacksAndMods", resourceCulture);
+            }
+        }
+
+        internal static string ClothingSets {
+            get {
+                return ResourceManager.GetString("ClothingSets", resourceCulture);
+            }
+        }
     }
 }

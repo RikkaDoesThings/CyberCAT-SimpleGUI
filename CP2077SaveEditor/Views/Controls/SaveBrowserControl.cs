@@ -23,6 +23,8 @@ namespace CP2077SaveEditor.Views.Controls
 
         private readonly TextBox _search;
         private readonly CheckBox _showAutoSaves;
+        private readonly ComboBox _lifePathFilter;
+        private readonly Button _deleteSelectedButton;
         private readonly ListView _list;
         private readonly ImageList _thumbnails;
         private readonly Label _emptyLabel;
@@ -30,20 +32,31 @@ namespace CP2077SaveEditor.Views.Controls
         private List<SaveEntry> _saves = new();
         private int _refreshVersion;
 
-        private record SaveEntry(string Folder, string SavPath, DateTime Modified, string Name, string Details, string Version, bool IsAutoSave);
+        private record SaveEntry(string Folder, string SavPath, DateTime Modified, string Name, string Details, string Version, bool IsAutoSave, string LifePath);
 
         public SaveBrowserControl(MainForm parentForm)
         {
             _parentForm = parentForm;
 
-            _search = new TextBox { PlaceholderText = "Search saves", Width = 240, Location = new Point(10, 8), BorderStyle = BorderStyle.FixedSingle };
+            _search = new TextBox { PlaceholderText = "Search saves", Width = 200, Location = new Point(10, 8), BorderStyle = BorderStyle.FixedSingle };
             _search.TextChanged += (_, _) => FillList();
 
-            _showAutoSaves = new CheckBox { Text = "Show autosaves", AutoSize = true, Checked = true, Location = new Point(262, 9) };
+            _showAutoSaves = new CheckBox { Text = "Show autosaves", AutoSize = true, Checked = true, Location = new Point(220, 9) };
             _showAutoSaves.CheckedChanged += (_, _) => FillList();
 
-            var refreshButton = new Button { Text = "Refresh", Size = new Size(92, 26), Location = new Point(392, 5) };
+            _lifePathFilter = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Width = 115 };
+            _lifePathFilter.Items.AddRange(new object[] { "All lifepaths", "Corporate", "Nomad", "StreetKid" });
+            _lifePathFilter.SelectedIndex = 0;
+            _lifePathFilter.SelectedIndexChanged += (_, _) => FillList();
+
+            var refreshButton = new Button { Text = "Refresh", Size = new Size(80, 26), Location = new Point(392, 5) };
             refreshButton.Click += (_, _) => RefreshSaves();
+
+            _deleteSelectedButton = new Button { Text = "Delete Selected", Size = new Size(108, 26), Enabled = false };
+            _deleteSelectedButton.Click += (_, _) => DeleteSelected();
+
+            var cleanAutosavesButton = new Button { Text = "Clean Autosaves...", Size = new Size(122, 26) };
+            cleanAutosavesButton.Click += (_, _) => CleanOldAutosaves();
 
             var top = new Panel { Dock = DockStyle.Top, Height = 38 };
             top.Paint += (_, e) =>
@@ -57,11 +70,11 @@ namespace CP2077SaveEditor.Views.Controls
                 e.Graphics.DrawLine(bottomPen, 0, top.Height - 1, top.Width, top.Height - 1);
                 e.Graphics.DrawLine(yellowPen, 10, top.Height - 1, 140, top.Height - 1);
 
-                if (top.Width > 650)
+                if (top.Width > 980)
                 {
                     using var hudFont = new Font(Theme.MonoFontFamily, 8f, FontStyle.Bold);
                     TextRenderer.DrawText(e.Graphics, "// NIGHT CITY DATABANK :: DOUBLE-CLICK TO JACK IN", hudFont,
-                        new Rectangle(refreshButton.Right + 12, 0, top.Width - refreshButton.Right - 22, top.Height - 2), Theme.Cyan,
+                        new Rectangle(cleanAutosavesButton.Right + 12, 0, top.Width - cleanAutosavesButton.Right - 22, top.Height - 2), Theme.Cyan,
                         TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
                 }
             };
@@ -71,13 +84,20 @@ namespace CP2077SaveEditor.Views.Controls
             top.Layout += (_, _) =>
             {
                 var s = top.DeviceDpi / 96f;
-                var gap = (int)(12 * s);
+                var gap = (int)(10 * s);
+                _search.Width = (int)(190 * s);
                 _search.Location = new Point((int)(10 * s), (top.Height - _search.Height) / 2);
                 _showAutoSaves.Location = new Point(_search.Right + gap, (top.Height - _showAutoSaves.Height) / 2);
-                refreshButton.Size = new Size((int)(92 * s), (int)(26 * s));
-                refreshButton.Location = new Point(_showAutoSaves.Right + gap, (top.Height - refreshButton.Height) / 2);
+                _lifePathFilter.Width = (int)(115 * s);
+                _lifePathFilter.Location = new Point(_showAutoSaves.Right + gap, (top.Height - _lifePathFilter.Height) / 2);
+                refreshButton.Size = new Size((int)(78 * s), (int)(26 * s));
+                refreshButton.Location = new Point(_lifePathFilter.Right + gap, (top.Height - refreshButton.Height) / 2);
+                _deleteSelectedButton.Size = new Size((int)(108 * s), (int)(26 * s));
+                _deleteSelectedButton.Location = new Point(refreshButton.Right + gap, (top.Height - _deleteSelectedButton.Height) / 2);
+                cleanAutosavesButton.Size = new Size((int)(122 * s), (int)(26 * s));
+                cleanAutosavesButton.Location = new Point(_deleteSelectedButton.Right + gap, (top.Height - cleanAutosavesButton.Height) / 2);
             };
-            top.Controls.AddRange(new Control[] { _search, _showAutoSaves, refreshButton });
+            top.Controls.AddRange(new Control[] { _search, _showAutoSaves, _lifePathFilter, refreshButton, _deleteSelectedButton, cleanAutosavesButton });
 
             _thumbnails = new ImageList { ImageSize = s_thumbnailSize, ColorDepth = ColorDepth.Depth32Bit };
 
@@ -87,7 +107,7 @@ namespace CP2077SaveEditor.Views.Controls
                 View = View.Tile,
                 TileSize = new Size(400, 100),
                 LargeImageList = _thumbnails,
-                MultiSelect = false,
+                MultiSelect = true,
                 BorderStyle = BorderStyle.None
             };
             // Tile view shows the item text plus one line per extra column
@@ -95,6 +115,7 @@ namespace CP2077SaveEditor.Views.Controls
             _list.Columns.Add("Details");
             _list.Columns.Add("Version");
             _list.ItemActivate += (_, _) => OpenSelected();
+            _list.SelectedIndexChanged += (_, _) => _deleteSelectedButton.Enabled = _list.SelectedItems.Count > 0;
 
             _emptyLabel = new Label
             {
@@ -138,7 +159,7 @@ namespace CP2077SaveEditor.Views.Controls
 
                 var folderName = Path.GetFileName(folder);
                 saves.Add(ReadMetadata(folder, savPath) ?? new SaveEntry(folder, savPath, File.GetLastWriteTime(savPath), folderName, "", "",
-                    folderName.StartsWith("AutoSave", StringComparison.OrdinalIgnoreCase)));
+                    folderName.StartsWith("AutoSave", StringComparison.OrdinalIgnoreCase), ""));
             }
 
             return saves.OrderByDescending(x => x.Modified).ToList();
@@ -161,13 +182,14 @@ namespace CP2077SaveEditor.Views.Controls
                 double GetNumber(string name) => metadata.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Number ? value.GetDouble() : 0;
                 bool GetBool(string name) => metadata.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.True;
 
+                var lifePath = GetString("lifePath");
                 var playTime = TimeSpan.FromSeconds(GetNumber("playthroughTime"));
-                var details = $"Level {GetNumber("level"):0} · {GetString("lifePath")} · {GetString("bodyGender")} · {(int)playTime.TotalHours}h{playTime.Minutes:00}m played";
+                var details = $"Level {GetNumber("level"):0} · {lifePath} · {GetString("bodyGender")} · {(int)playTime.TotalHours}h{playTime.Minutes:00}m played";
                 var version = $"Patch {GetString("buildPatch")} · {File.GetLastWriteTime(savPath).ToString("g", CultureInfo.CurrentCulture)}" +
                               (GetBool("isModded") ? " · modded" : "");
 
                 return new SaveEntry(folder, savPath, File.GetLastWriteTime(savPath), Path.GetFileName(folder), details, version,
-                    Path.GetFileName(folder).StartsWith("AutoSave", StringComparison.OrdinalIgnoreCase));
+                    Path.GetFileName(folder).StartsWith("AutoSave", StringComparison.OrdinalIgnoreCase), lifePath);
             }
             catch (Exception e)
             {
@@ -180,8 +202,10 @@ namespace CP2077SaveEditor.Views.Controls
         private void FillList()
         {
             var terms = _search.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var selectedLifePath = _lifePathFilter.SelectedIndex > 0 ? _lifePathFilter.SelectedItem?.ToString() : null;
             var visible = _saves
                 .Where(x => _showAutoSaves.Checked || !x.IsAutoSave)
+                .Where(x => selectedLifePath == null || string.Equals(x.LifePath, selectedLifePath, StringComparison.OrdinalIgnoreCase))
                 .Where(x => terms.All(t => (x.Name + " " + x.Details).Contains(t, StringComparison.CurrentCultureIgnoreCase)))
                 .ToList();
 
@@ -266,10 +290,87 @@ namespace CP2077SaveEditor.Views.Controls
 
         private void OpenSelected()
         {
-            if (_list.SelectedItems.Count == 1 && _list.SelectedItems[0].Tag is SaveEntry save)
+            var target = _list.FocusedItem ?? (_list.SelectedItems.Count > 0 ? _list.SelectedItems[0] : null);
+            if (target?.Tag is SaveEntry save)
             {
                 _parentForm.OpenSave(save.SavPath);
             }
+        }
+
+        private void DeleteSelected()
+        {
+            var selected = _list.SelectedItems.Cast<ListViewItem>()
+                .Select(x => x.Tag)
+                .OfType<SaveEntry>()
+                .ToList();
+            if (selected.Count == 0)
+            {
+                return;
+            }
+
+            if (MessageBox.Show(
+                $"Send {selected.Count} selected save folder(s) to the Recycle Bin?",
+                "Delete Saves",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            DeleteSaveEntries(selected);
+        }
+
+        private void CleanOldAutosaves()
+        {
+            const int keepNewest = 5;
+            var oldAutosaves = _saves
+                .Where(x => x.IsAutoSave)
+                .OrderByDescending(x => x.Modified)
+                .Skip(keepNewest)
+                .ToList();
+
+            if (oldAutosaves.Count == 0)
+            {
+                MessageBox.Show($"You have {keepNewest} or fewer autosaves. Nothing to clean.", "Clean Autosaves", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            if (MessageBox.Show(
+                $"Send {oldAutosaves.Count} older autosave(s) to the Recycle Bin, keeping the {keepNewest} newest?",
+                "Clean Autosaves",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+
+            DeleteSaveEntries(oldAutosaves);
+        }
+
+        private void DeleteSaveEntries(List<SaveEntry> entries)
+        {
+            var deleted = 0;
+            foreach (var entry in entries)
+            {
+                try
+                {
+                    if (Directory.Exists(entry.Folder))
+                    {
+                        Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(
+                            entry.Folder,
+                            Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                            Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                        deleted++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Failed to delete save folder {entry.Folder}", ex);
+                }
+            }
+
+            RefreshSaves();
+            MessageBox.Show($"Sent {deleted} save folder(s) to the Recycle Bin.", "Save Browser", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
