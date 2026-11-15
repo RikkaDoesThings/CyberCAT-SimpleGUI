@@ -11,7 +11,8 @@ namespace CP2077SaveEditor.Utils
     /// </summary>
     public static class AppConfig
     {
-        private static readonly Dictionary<string, int> s_values = Load();
+        private static readonly JsonSerializerOptions s_writeOptions = new() { WriteIndented = true };
+        private static Dictionary<string, int> s_values = Load();
 
         /// <summary>
         /// Shows work in progress features. "EnableWIPFeatures": 1
@@ -32,6 +33,28 @@ namespace CP2077SaveEditor.Utils
         /// How many edits Ctrl+Z can undo, 10 by default. Each step keeps a copy of the save in memory (~4 MB). "UndoSteps": 0 turns it off
         /// </summary>
         public static int UndoSteps => s_values.GetValueOrDefault("UndoSteps", 10);
+
+        public static string GetConfigPath()
+        {
+            return new[] { Environment.CurrentDirectory, AppContext.BaseDirectory }
+                .Select(x => Path.Combine(x, "config.json"))
+                .FirstOrDefault(File.Exists)
+                ?? Path.Combine(AppContext.BaseDirectory, "config.json");
+        }
+
+        public static void Save(int theme, int undoSteps, bool checkForUpdates, string path = null)
+        {
+            var targetPath = path ?? GetConfigPath();
+            var updated = new Dictionary<string, int>(s_values)
+            {
+                ["Theme"] = Math.Clamp(theme, 0, 2),
+                ["UndoSteps"] = Math.Max(0, undoSteps),
+                ["CheckForUpdates"] = checkForUpdates ? 1 : 0
+            };
+
+            File.WriteAllText(targetPath, JsonSerializer.Serialize(updated, s_writeOptions));
+            s_values = updated;
+        }
 
         private static Dictionary<string, int> Load()
         {

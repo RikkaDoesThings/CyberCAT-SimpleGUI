@@ -58,7 +58,7 @@ namespace CP2077SaveEditor.Views
         private byte[] _savedStateHash;
 
         // Undo: a state is recorded once the edits pause, see CaptureUndoPoint
-        private readonly UndoHistory _undoHistory = new(AppConfig.UndoSteps);
+        private UndoHistory _undoHistory = new(AppConfig.UndoSteps);
         private readonly Timer _undoTimer = new() { Interval = 1500 };
         private bool _undoPending;
         private bool _isRestoring;
@@ -74,6 +74,13 @@ namespace CP2077SaveEditor.Views
             tssl_Info.IsLink = true;
             tssl_Info.ToolTipText = "Open the releases page";
             tssl_Info.Click += (_, _) => Process.Start(new ProcessStartInfo(_infoLink) { UseShellExecute = true });
+            var settingsLabel = new ToolStripStatusLabel("Settings")
+            {
+                IsLink = true,
+                ToolTipText = "Configure theme, Undo steps, and update checks (saved to config.json)."
+            };
+            settingsLabel.Click += (_, _) => OpenSettings();
+            statusStrip1.Items.Insert(statusStrip1.Items.IndexOf(tssl_Info), settingsLabel);
             ChangeTracker.Changed += (_, _) => this.InvokeIfRequired(UpdateTitle);
             ChangeTracker.Edited += (_, _) => this.InvokeIfRequired(OnEdited);
             _undoTimer.Tick += (_, _) => CaptureUndoPoint();
@@ -124,6 +131,27 @@ namespace CP2077SaveEditor.Views
             if (AppConfig.CheckForUpdates)
             {
                 await ShowUpdateIfAvailable();
+            }
+        }
+
+        private void OpenSettings()
+        {
+            var previousUndoSteps = AppConfig.UndoSteps;
+            using var dialog = new SettingsDialog();
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            if (AppConfig.UndoSteps != previousUndoSteps)
+            {
+                _undoPending = false;
+                _undoTimer.Stop();
+                _undoHistory = new UndoHistory(AppConfig.UndoSteps);
+                if (IsLoaded && ActiveSaveFile != null)
+                {
+                    _undoHistory.Reset(SerializeSave());
+                }
             }
         }
 
@@ -709,16 +737,14 @@ namespace CP2077SaveEditor.Views
                 File.Move(tempFileName, fileName, true);
 
                 var metadataPath = Path.Combine(fileDirectory, "metadata.9.json");
-                if (!File.Exists(metadataPath))
+                if (ActiveSaveFile.Metadata != null)
                 {
-                    if (ActiveSaveFile.Metadata != null)
-                    {
-                        await File.WriteAllBytesAsync(metadataPath, ActiveSaveFile.Metadata);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Error while saving file: metadata.9.json could not be found.");
-                    }
+                    ActiveSaveFile.Metadata = SaveMetadataHelper.UpdateMetadata(ActiveSaveFile.Metadata, ActiveSaveFile);
+                    await File.WriteAllBytesAsync(metadataPath, ActiveSaveFile.Metadata);
+                }
+                else if (!File.Exists(metadataPath))
+                {
+                    MessageBox.Show("Error while saving file: metadata.9.json could not be found.");
                 }
 
                 var screenshotPath = Path.Combine(fileDirectory, "screenshot.png");

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.34.1
+
+- **Editor Settings dialog (`Settings` in the bottom status bar):** configure **Theme** (Windows / Light / Dark), **Undo steps** (`0` to disable Undo/Redo), and **Check for updates** directly from the UI without manually creating `config.json` (useful in the Standalone `.exe`).
+- **Save metadata sync:** saving now updates `level`, `streetCred`, and `lifePath` in `metadata.9.json` so the in-game Load Save screen and Save Browser reflect edited values immediately.
+
 ## 0.34.0
 
 - **CD PROJEKT RED cross-save cloud sync (`Cloud...`):** sign in via browser OAuth device flow, list your cloud saves, download any slot into the editor, and upload the edited save back (with automatic local backup and byte-for-byte verification). Works with PS5, Xbox, and PC/Game Pass cloud saves without needing Cyberpunk 2077 installed.
