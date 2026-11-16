@@ -1,147 +1,146 @@
 # TODO / Roadmap
 
-Lista de melhorias priorizadas. Marque `[x]` conforme for concluindo.
+Prioritized list of improvements. Mark `[x]` as each item is completed.
 
-Cada item traz **Onde** (arquivos e trechos que provavelmente precisam mudar) e **Como** (abordagem sugerida). As linhas citadas referem-se ao código atual e podem mudar.
+Each item includes **Where** (files and sections that will likely need changes) and **How** (suggested approach). Referenced line numbers refer to the current code and may shift.
 
-> **Convenção do projeto:** cada aba é um `UserControl` que implementa `IGameControl` ([Utils/IGameControl.cs](CP2077SaveEditor/Utils/IGameControl.cs)), é registrado em `MainForm()` via `RegisterControl(...)` e escuta `PropertyChanged` de `ActiveSaveFile` para se inicializar. O acesso ao save passa por [SaveFileHelper.cs](CP2077SaveEditor/Utils/SaveFileHelper.cs). Os dados estáticos do jogo ficam em `CP2077SaveEditor/Resources/*.json`, gerados pelo [ResourceGenerator](ResourceGenerator/Program.cs).
-
----
-
-## ✅ Concluído
-
-- [x] Mover itens entre inventário e cofre (`MoveItemsToStash` / `MoveItemsToInventory` em `InventoryControl.cs`)
-- [x] Backups com data e hora a cada save (`sav.yyyyMMdd-HHmmss.bak`, mantém os 5 últimos — `MaxBackups` em `MainForm.cs`) + `sav.old` original preservado
-- [x] Gravação segura: grava em `sav.dat.tmp`, relê com `CyberpunkSaveReader` (`VerifySaveFile`) e só então substitui o `sav.dat`
-- [x] Aviso de alterações não salvas ao fechar ou abrir outro save (`ConfirmDiscardChanges`, compara o SHA-256 da serialização com `_savedStateHash`)
-- [x] Botão **Save** + atalho `Ctrl+S` (`QuickSave`); o antigo botão virou **Save As...**
-- [x] Copiar → Colar item (`CopyItem` / `PasteItem` / `CloneItemData` / `CloneItemStats` em `InventoryControl.cs` + fix em `CreateStatData`)
-- [x] "Clear All Item Flags" com confirmação e opção de limpar apenas itens selecionados (`clearQuestFlagsButton_Click` em `InventoryControl.cs`)
-- [x] Remover código morto do Debloat (`InventoryControl.cs` e `InventoryControl.Designer.cs`)
-- [x] Corrigir falsos avisos de "unsaved changes" ao abrir abas ou `ItemDetails` (`_isLoading` em `PlayerStatsControl.cs`, `ItemDetails.cs`, `InventoryControl.cs` e `ModNodeDetails.cs`)
-- [x] Suporte a High DPI (`Application.SetHighDpiMode(HighDpiMode.PerMonitorV2)` em `Program.cs`)
-- [x] Corrigir build quebrada (`using WolvenKit.RED4.Save;` faltando em `InventoryControl.cs`, usado por `CloneItemStats`)
-- [x] Saves de versão mais nova que a suportada abrem **somente leitura** (`_isReadOnly` / `MaxSupportedGameVersion` em `MainForm.cs`). Evita gravar um save 2.5 com o WolvenKit antigo, que apaga os stats
-- [x] Veículos: lista regenerada do TweakDB 2.5 (+ Muramasa), aba com busca, **Unlock all** / **Lock all** (atuam sobre o resultado da busca), seleção múltipla, código limpo (`VehiclesControl.cs`)
-- [x] **Tema escuro** ([Theme.cs](CP2077SaveEditor/Utils/Theme.cs)): segue o Windows (`config.json` `"Theme"`: 1 claro, 2 escuro). Usa o modo escuro nativo do WinForms (.NET 10) e corrige o que ele não cobre: cores fixas dos designers, `ModernButton`, cabeçalho e seleção das ListViews (owner-draw só nessas partes), linhas de grade; diálogos são tematizados ao abrir (`Application.Idle`). Validado por print em Inventory, Perks, Cyberware e Vehicles; o modo claro continua igual ao original. `config.json` lido por `AppConfig`
-- [x] `ResourceGenerator` aceita `[gameDir] [vehicles|items|mods|modifiergroups ...]`, compila com o WolvenKit atual (`new HashService()` registra os nomes do TweakDB), não quebra com records sem nome
-- [x] Mensagens de erro ao carregar: versão do jogo no erro e no `error.txt`, dicas para "save mais novo que o editor" e "dados de mod desconhecidos", e o editor não fica habilitado com save carregado pela metade (`GetLoadErrorHint` em `MainForm.cs`)
-- [x] "Add item" não quebra com itens sem nome conhecido (`AddItem.RefreshItems`)
-- [x] **Suporte ao patch 2.5:** WolvenKit atualizado para o `main` (`65ea74b01`, com `update_2.5`), projetos em .NET 10 (`WFO1000` suprimido no `.csproj`). O round-trip do save 2.5 preserva o `StatsSystem` e o `ScriptableSystemsContainer`. O `PersistencySystem2` muda de tamanho, mas as 156 mil entradas ficam idênticas
-- [x] **Stats no formato 2.5** ([OptimizedStatsHelper.cs](CP2077SaveEditor/Utils/OptimizedStatsHelper.cs)): expõe `gameSavedStatsDataOptimized` como `gameSavedStatsData`. O `FlushStats()` é chamado em `SerializeSave` e faz copy-on-write das fatias compartilhadas do `sharedDataBuffer`. Testado: materializar as 1.746 entradas e gravar dá um save idêntico; editar um item não afeta os que dividiam a fatia; clonar stats funciona; o flush é idempotente
-- [x] `ItemClasses.json` regenerado do 2.5 (+191 itens, −27 loot tables obsoletas)
-- [x] **Tier 5++**: botão "Make Tier 5++" no `ItemDetails` e no menu de contexto do inventário (vários itens de uma vez). `SetMaxTier` em `SaveFileHelper` usa o teto dos stats no TweakDB (`BaseStats.Quality` max 4, `BaseStats.IsItemPlus` max 2): soma modificadores aditivos até o total ser ≥ 4 / ≥ 2, então funciona para armas saqueadas e icônicas sem conhecer a qualidade base. Botão morto "Infuse Legendary Components" removido
-- [x] **Add item** com busca (vários termos), filtro por tipo, lista, contador, duplo clique/Enter para adicionar e janela redimensionável
-- [x] Busca do inventário: prefixos `quantity:`/`desc:` filtravam a coluna errada (desde que entrou a coluna Slot); adicionado `slot:` e os prefixos aparecem no placeholder. A ordenação por coluna já existia (clique no cabeçalho)
-- [x] Barra de progresso (marquee) durante carregar/salvar/verificar e nome do save no título da janela
-- [x] **Nomes do jogo** no inventário e no "Add item" (PT-BR se o Windows estiver em português, senão inglês). `ResourceGenerator ... names` gera `Resources/DisplayNames.json` a partir do `DisplayName` (LocKey) dos records de itens/veículos + `onscreens*.json` de `lang_en_text`/`lang_pt_text` (base e ep1). A coluna ID continua com o identificador técnico; a busca do "Add item" acha pelos dois
-- [x] Aba de veículos com coluna "Name" (nome do jogo) e busca pelo nome
-- [x] Removidos `items.bin` (30 MB, sem uso desde 2021) e o recurso `Mods.json` (não era usado; `ResourceGenerator ... mods` ainda gera o arquivo se precisar)
-- [x] CI: `.github/workflows/build.yml` compila a cada push/PR (publish x64, zip como artefato) e anexa o zip à release em tags `v*`. README menciona o .NET 10 Desktop Runtime
-- [x] Botão "Crafting components..." (Quick Actions do inventário): os 9 componentes de item/quickhack com nome do jogo, "Set all to 99999"; zero remove o item, valor > 0 cria se não existir ([CraftingComponentsDialog.cs](CP2077SaveEditor/Views/CraftingComponentsDialog.cs))
-- [x] Logs: erros de carregar/salvar e exceções não tratadas vão para `logs\yyyy-MM-dd.log` ao lado do executável ([Logger.cs](CP2077SaveEditor/Utils/Logger.cs)); a mensagem mostra o caminho. Tratador global em `Program.cs` evita fechar o app sem registro
-- [x] `Form2` renomeado para `MainForm` (classe, arquivos e handlers)
-- [x] `ResourceGenerator "<pasta do jogo>" all --out CP2077SaveEditor/Resources` regenera todos os JSONs usados pelo editor (testado: sai idêntico ao commitado). README reescrito com as funcionalidades atuais e instruções
-- [x] Limpeza: removidos `AppearanceHelper.cs` (~1900 linhas sem uso; `AppearanceValueLists`/`AppearanceGender` foram para `Utils/AppearanceValueLists.cs`) e `AppearancePreset.cs`; opção morta `EnablePSData`; `config.json` agora só tem `EnableWIPFeatures` e é procurado na pasta atual ou ao lado do .exe
-- [x] Aba **Cyberware** ([CyberwareControl.cs](CP2077SaveEditor/Views/Controls/CyberwareControl.cs) + [CyberwareHelper.cs](CP2077SaveEditor/Utils/CyberwareHelper.cs)): slots por área com o implante equipado; equipar qualquer cyberware da área (do inventário ou criando o item), desequipar; **capacidade extra** = modificador `Humanity` aditivo salvo nos stats do V, somado à capacidade que o jogo calcula (21 + 3×nível + skill Tech + perk + shards, ver `Character.PlayerCyberwareSystem` no TweakDB). `ResourceGenerator ... cyberware` gera `Resources/Cyberware.json` (1582 itens → área). "Equip in Slot" do inventário agora grava o ItemID completo (seed + contador), como o jogo
-- [x] Aba **Perks** ([PerksControl.cs](CP2077SaveEditor/Views/Controls/PerksControl.cs) + [PerkHelper.cs](CP2077SaveEditor/Utils/PerkHelper.cs)): árvores 2.0 por atributo + Relic, nomes no idioma do Windows, tier, nível atual/máximo; duplo clique alterna, "Set level", "Max all", "Remove all"; opção de cobrar/devolver perk points (Relic points para Espionage). `ResourceGenerator ... perks` gera `Resources/Perks.json` (194 perks). Requisitos entre perks não são checados
-- [x] Tela inicial "Saves" ([SaveBrowserControl.cs](CP2077SaveEditor/Views/Controls/SaveBrowserControl.cs)): lista as pastas de save com miniatura, nível, life path, gênero, tempo de jogo, patch, data e "modded" (do `metadata.9.json`), busca e filtro de autosaves; duplo clique abre (com aviso de alterações não salvas) e leva para a aba Player Stats
-- [x] Testes de round-trip (`CP2077SaveEditor.Tests`, xUnit v3): save idêntico ao regravar, ler todos os stats não altera nada, edição não vaza para itens que dividem a fatia, Tier 5++ idempotente, clone independente, stats do jogador. Usam `CP2077_TEST_SAVE`; sem ela são pulados (CI). `SaveFileHelper.Serialize()` e `CloneStats()` agora são compartilhados pela UI e pelos testes
-- [x] Correções após os testes de 28/10: crash da lista virtual ao encolher com itens selecionados (`TypeExtensions.RetrieveDefaultVirtualItem`); duplo clique no inventário abre a linha clicada (antes, o primeiro item selecionado); "Make Tier 5++" avisa quando o item já está no máximo; tooltips do `ModernButton` (label filho engolia o hover); CI sem zip duplo e com actions atualizadas
-- [x] Correções após os testes de 29/10 (tudo in-game passou: capacidade extra, implantes acima do limite, perks, clone 5++, persistência após salvar pelo jogo): tooltips do `ModernButton` de novo (o label só era criado em `OnCreateControl`, depois do construtor da tela; agora no construtor do botão); `ModernValuePicker` desenhava em preto fixo (gênero/voz ilegíveis no escuro), agora segue `ForeColor`; `TabPage` com `UseVisualStyleBackColor` ficava branca no escuro; lista virtual rolada que encolhia (filtro) deixava linhas em branco no topo (`SetVirtualItems` volta ao topo antes de encolher)
-- [x] Aba Extras: "Unlock Fast Travel" só adiciona os pontos que faltam (antes apagava todos e recriava a partir do JSON, perdendo pontos que o JSON não conhecesse); confirmação/feedback e tooltips nas três ações
-- [x] Ações em massa no menu do inventário: "Set Quantity..." (itens empilháveis) e "Make Tier 5++". Para mover tudo de um tipo: buscar `type:Weapon` e usar "Move All Listed Items to Stash"
-- [x] Teste automatizado pelo `MainForm` real num save 2.5: carrega editável, sem aviso falso de alterações, Tier 5++ + salvar + verificar OK
-- [x] Destaque visual no botão ativo da barra lateral (`ModernButton.IsSelected`, `ScrollMenuControl.SelectButton` e `SwitchPanel` em `MainForm.cs`) + rolagem com o mouse sobre os botões do menu
-- [x] Versão no `.csproj` (`<Version>0.29.0</Version>`, mostrada na barra de status) e checagem de atualização ao abrir ([UpdateChecker.cs](CP2077SaveEditor/Utils/UpdateChecker.cs)): consulta a última release do fork no GitHub e, se houver uma mais nova, a versão vira um link para a página de download. Desligável com `"CheckForUpdates": 0` no `config.json`
-- [x] Indicador de alterações não salvas: "*" após o nome do save (título e barra lateral). As ações de edição chamam `ChangeTracker.MarkChanged()` ([ChangeTracker.cs](CP2077SaveEditor/Utils/ChangeTracker.cs)); é zerado ao carregar/salvar e quando a checagem por hash conclui que nada mudou. **Ao criar uma ação nova que altera o save, chamar `ChangeTracker.MarkChanged()`**
-- [x] **GUI moderna (taste-skill `data-terminal`):** paleta escura neutra (`#111113`–`#2B2B33`), destaque primário amarelo Cyberpunk (`#FCEE0A`) e secundário ciano (`#00F0FF`) em `Theme.cs` / `ModernButton` / `ModernValuePicker` / `GroupBox` / cabeçalhos de `ListView`; tipografia `Bahnschrift` + `Cascadia Mono` / `Consolas` tabular para valores numéricos; `PlayerStatsControl` reorganizado em `TableLayoutPanel` + `GroupBox` redimensionáveis; barra lateral alargada (176 px) com altura compacta (44 px); botões e barras de busca redimensionados para High DPI em `QuestFactsControl` e `AppearanceControl`; tooltips explicativos (`Theme.SetToolTip`) em todas as abas
+> **Project convention:** each tab is a `UserControl` implementing `IGameControl` ([Utils/IGameControl.cs](CP2077SaveEditor/Utils/IGameControl.cs)), registered in `MainForm()` via `RegisterControl(...)`, and listening to `PropertyChanged` on `ActiveSaveFile` to initialize. Save access goes through [SaveFileHelper.cs](CP2077SaveEditor/Utils/SaveFileHelper.cs). Static game data lives in `CP2077SaveEditor/Resources/*.json`, generated by [ResourceGenerator](ResourceGenerator/Program.cs).
 
 ---
 
-## 🔴 Prioridade alta — correções
+## ✅ Completed
 
-### Testar o patch 2.5 no jogo — feito (29/10/2026)
-- [x] Editar um save 2.5 (cópia!) no app: mudar a Quality de uma arma, clonar um item, mudar dinheiro/atributos. Carregar no jogo e conferir que o item editado mudou, que **outras armas do mesmo modelo não mudaram** e que o save carrega sem erros.
-- [x] "Make Tier 5++" numa arma saqueada (ex.: Pulsar) e numa icônica (ex.: Warden): conferir no jogo que ficam Tier 5++ e que o dano subiu. As icônicas usam curvas próprias e são as mais incertas.
-- [x] Repetir com um save antigo (testado com um 2.2), para garantir que o caminho antigo (`Keys`/`Values`) continua funcionando.
-- **Riscos conhecidos:**
-  - O significado das flags de `gameBufferSlice.Combined` (bits 30–31) foi deduzido do save: 0 = modificadores de item, 1 = modificadores de entidade (o jogador), 2 = modifier groups.
-  - Quando o `sharedDataBuffer` enche, ele cresce para a próxima potência de 2 (o jogo usou 32768). Isso ainda não foi testado no jogo: o save atual tem ~10 KB livres.
-  - Fatias que deixam de ser usadas continuam no buffer, e cada edição salva acrescenta uma fatia nova (sem compactação).
-
-### Recursos estáticos — o que sobrou
-- `Vehicles.json` ✅ e `ModifierGroups.json` (regenerado, sem mudanças) ✅.
-- `ItemClasses.json` ✅ (regenerado com o WolvenKit novo; todos os nomes resolvem).
-- **`FastTravel.json`:** conferido contra o TweakDB do 2.5 (29/10/2026): cobre 232 dos 245 `gamedataFastTravelPoint_Record`, incluindo Dogtown. Os 13 restantes são mapas de teste (`gym_tech_*`), nomes antigos sem uso (`WatsonMain`, `WatsonSubway`...) e `wat_lch_dataterm_08`. Um gerador não ajudaria: o `MarkerRef` vem do mundo, não do TweakDB. Para conferir de novo, comparar os pontos de um save 100% com o JSON. **`Facts.json`** provavelmente veio de um dump externo; documentar a origem.
-- **`AppearanceValues.json`:** `GenerateAppearanceValues` lê `basegame_1_engine.archive`; checar se ainda funciona.
-
-### Testar na interface — feito
-- [x] Aba de veículos: busca, Unlock all/Lock all com e sem filtro, double-click com vários selecionados.
-- [x] Editor de stats (`StatsControl`) em item de save 2.5: listar, adicionar e remover modificadores. O botão de criar "forced modifiers" fica desabilitado (o formato 2.5 não tem esse campo).
-- [x] A trava de somente leitura (conferida no código; falta um save de patch > 2.5 para testar de verdade) só dispara para saves de versão acima do 2.5 (`gameGameVersion.Current` = 2500).
-
----
-
-## 🟠 Prioridade média — usabilidade
-
-### Inventário
-
-#### Tiers intermediários (1–5) e "+" exatos — inviável por enquanto
-- O tier das armas/roupas aleatórias vem de curvas sobre `RandomCurveInput`, sorteado pelo jogo a partir da seed; não dá para calcular o tier base fora do jogo (ver "Cor por raridade").
-- O jogo só limita o valor final (Quality 0–4, IsItemPlus 0–2). Sem saber a base, um aditivo só garante os extremos: +muito = Tier 5++ (já existe), −muito = Tier 1. Um tier do meio exigiria conhecer a base.
-
-
-#### Cor por raridade — falta nas armas e roupas
-- Feito para os itens de raridade fixa (mods, programas, cyberware, consumíveis...): `ItemClasses.json` tem `Quality` e o nome é pintado em `RefreshInventory` (`Theme.GetQualityColor`).
-- **Falta:** armas e roupas cujo record modifica `BaseStats.Quality` (ficam sem `Quality` no JSON). O tier delas vem de curvas sobre `RandomCurveInput`, que o jogo sorteia a partir da seed, então não dá para calcular fora do jogo. Única saída plausível: ler um valor que o próprio jogo já calculou e salvou, se existir (procurar no save algo como cache de stats / `MaxQualityWhenLooted`).
-
-### Personagem
-
-#### Respec — não fazer (o jogo já tem)
-- Desde o 2.0 o jogo devolve perks de graça no próprio menu e oferece um reset de atributos; a aba Player Stats já edita atributos e pontos (`DevPoints`) diretamente. Só vale fazer se alguém pedir.
-- **Onde, se for fazer:** `PlayerDevelopmentData.AttributesData[].UnlockedPerks` (perks 2.0) e `DevPoints` (`Attribute`, `Primary`, `Espionage`) via `GetPlayerDevelopmentData()`.
-
-#### Aba de aparência — avaliado, não vale agora
-- Hoje: gênero, voz, presets e o editor avançado (grupos brutos). Os campos `HairStyle`/`HairColor`/`EyeColor` de `AppearanceHelper2` estão escondidos porque `SetValue` nunca foi implementado.
-- No 2.x o penteado é o caminho de um `.app` (`hairs` → `hh_025_pwa__hairs_081.app`, com uma entrada `FPP_hairs` correspondente), a cor do cabelo é o `Definition` (`07_blonde_golden`) e a cor dos olhos usa nomes como `he_000_pwa__basehead__15_gradient_light_blue`, diferentes de `AppearanceValueLists` (lista da era 1.x).
-- Implementar exigiria mapear os caminhos e testar no jogo (risco de V sem cabelo). O espelho do jogo (2.0+) já muda cabelo e olhos, então só vale se alguém pedir.
-
-### Mundo
-- [x] **Gigs / NCPD — inviável só com facts:** não existe um fact de "gig concluída". Os ~690 `sts_*` são etapas internas de cada gig (`..._combat_start`, `..._chase_spawned`) e o nível de reputação do fixer (`sts_<fixer>_tier_1..4`); os `ma_*` são as atividades da NCPD. A conclusão fica no diário de quests (journal), que o editor não edita. Mudar só os facts deixaria gigs pela metade.
-- [x] **Fast travel:** "Unlock all" em `ExtrasControl.btn_UnlockAll_Click`; `FastTravel.json` conferido para o 2.5 (ver "Recursos estáticos").
-- [x] **Guarda-roupa — avaliado, não vale agora:** o inventário `0x7901DE03D136A5AF` ("V's Wardrobe") já aparece e pode ser editado em `InventoryControl`, e `ModSupport/ExtraWardrobeSlots` já tem suporte à limpeza de blacklist em `ExtrasControl`. Os conjuntos do guarda-roupa nativo (`WardrobeSystem_ClothingSets`) guardam 6 blocos binários de `0x8E` bytes com campos `Unknown1..Unknown6` não mapeados no parser do WolvenKit, e o `WardrobeSystem` exige o `AppearanceName` interno de cada `.ent` (ausente em `ItemClasses.json`). O próprio jogo já permite montar e trocar os conjuntos gratuitamente.
+- [x] Move items between inventory and stash (`MoveItemsToStash` / `MoveItemsToInventory` in `InventoryControl.cs`)
+- [x] Timestamped backups on every save (`sav.yyyyMMdd-HHmmss.bak`, keeps the last 5 — `MaxBackups` in `MainForm.cs`) + original `sav.old` preserved
+- [x] Safe write: writes to `sav.dat.tmp`, re-reads with `CyberpunkSaveReader` (`VerifySaveFile`), and only then replaces `sav.dat`
+- [x] Unsaved changes prompt when closing or opening another save (`ConfirmDiscardChanges`, compares serialization SHA-256 against `_savedStateHash`)
+- [x] **Save** button + `Ctrl+S` shortcut (`QuickSave`); the previous button became **Save As...**
+- [x] Copy → Paste item (`CopyItem` / `PasteItem` / `CloneItemData` / `CloneItemStats` in `InventoryControl.cs` + fix in `CreateStatData`)
+- [x] "Clear All Item Flags" with confirmation and option to clear only selected items (`clearQuestFlagsButton_Click` in `InventoryControl.cs`)
+- [x] Remove dead Debloat code (`InventoryControl.cs` and `InventoryControl.Designer.cs`)
+- [x] Fix false "unsaved changes" warnings when opening tabs or `ItemDetails` (`_isLoading` in `PlayerStatsControl.cs`, `ItemDetails.cs`, `InventoryControl.cs`, and `ModNodeDetails.cs`)
+- [x] High DPI support (`Application.SetHighDpiMode(HighDpiMode.PerMonitorV2)` in `Program.cs`)
+- [x] Fix broken build (missing `using WolvenKit.RED4.Save;` in `InventoryControl.cs`, used by `CloneItemStats`)
+- [x] Saves from newer game versions than supported open **read-only** (`_isReadOnly` / `MaxSupportedGameVersion` in `MainForm.cs`). Prevents writing a 2.5 save with an older WolvenKit that would wipe stats
+- [x] Vehicles: list regenerated from TweakDB 2.5 (+ Muramasa), tab with search, **Unlock all** / **Lock all** (act on search results), multi-selection, clean code (`VehiclesControl.cs`)
+- [x] **Dark theme** ([Theme.cs](CP2077SaveEditor/Utils/Theme.cs)): follows Windows (`config.json` `"Theme"`: 1 light, 2 dark). Uses WinForms native dark mode (.NET 10) and fixes what it doesn't cover: hardcoded designer colors, `ModernButton`, ListView headers and selection (owner-draw only for those parts), gridlines; dialogs are themed on open (`Application.Idle`). Validated via screenshots on Inventory, Perks, Cyberware, and Vehicles; light mode remains identical to the original. `config.json` read by `AppConfig`
+- [x] `ResourceGenerator` accepts `[gameDir] [vehicles|items|mods|modifiergroups ...]`, builds against current WolvenKit (`new HashService()` registers TweakDB names), and doesn't crash on unnamed records
+- [x] Load error messages: game version shown in error and `error.txt`, hints for "save newer than editor" and "unknown mod data", and the editor is not left enabled with a half-loaded save (`GetLoadErrorHint` in `MainForm.cs`)
+- [x] "Add item" doesn't crash on items without a known name (`AddItem.RefreshItems`)
+- [x] **Patch 2.5 support:** WolvenKit updated to `main` (`65ea74b01`, with `update_2.5`), projects on .NET 10 (`WFO1000` suppressed in `.csproj`). Round-trip of a 2.5 save preserves `StatsSystem` and `ScriptableSystemsContainer`. `PersistencySystem2` changes size, but all 156k entries remain identical
+- [x] **Stats in 2.5 format** ([OptimizedStatsHelper.cs](CP2077SaveEditor/Utils/OptimizedStatsHelper.cs)): exposes `gameSavedStatsDataOptimized` as `gameSavedStatsData`. `FlushStats()` is called in `SerializeSave` and performs copy-on-write on shared slices of `sharedDataBuffer`. Tested: materializing all 1,746 entries and writing produces an identical save; editing one item doesn't affect others sharing the slice; cloning stats works; flush is idempotent
+- [x] `ItemClasses.json` regenerated from 2.5 (+191 items, −27 obsolete loot tables)
+- [x] **Tier 5++**: "Make Tier 5++" button in `ItemDetails` and inventory context menu (multiple items at once). `SetMaxTier` in `SaveFileHelper` uses TweakDB stat caps (`BaseStats.Quality` max 4, `BaseStats.IsItemPlus` max 2): adds additive modifiers until the total is ≥ 4 / ≥ 2, so it works for both looted and iconic weapons without knowing base quality. Removed dead "Infuse Legendary Components" button
+- [x] **Add item** with search (multiple terms), type filter, list, counter, double-click/Enter to add, and resizable window
+- [x] Inventory search: `quantity:`/`desc:` prefixes were filtering the wrong column (since the Slot column was added); added `slot:` and listed prefixes in the placeholder. Column sorting already existed (click column header)
+- [x] Progress bar (marquee) during load/save/verify and save name in window title
+- [x] **In-game item names** in inventory and "Add item" (PT-BR if Windows is in Portuguese, otherwise English). `ResourceGenerator ... names` generates `Resources/DisplayNames.json` from `DisplayName` (LocKey) of item/vehicle records + `onscreens*.json` from `lang_en_text`/`lang_pt_text` (base and ep1). The ID column keeps the technical identifier; "Add item" search matches both
+- [x] Vehicles tab with "Name" column (in-game name) and search by name
+- [x] Removed `items.bin` (30 MB, unused since 2021) and `Mods.json` resource (unused; `ResourceGenerator ... mods` still generates the file if needed)
+- [x] CI: `.github/workflows/build.yml` builds on every push/PR (publish x64, zip artifact) and attaches the zip to releases on `v*` tags. README mentions .NET 10 Desktop Runtime
+- [x] "Crafting components..." button (inventory Quick Actions): all 9 item/quickhack components with in-game names, "Set all to 99999"; 0 removes the item, value > 0 creates it if missing ([CraftingComponentsDialog.cs](CP2077SaveEditor/Views/CraftingComponentsDialog.cs))
+- [x] Logs: load/save errors and unhandled exceptions are written to `logs\yyyy-MM-dd.log` next to the executable ([Logger.cs](CP2077SaveEditor/Utils/Logger.cs)); the error dialog displays the path. Global handler in `Program.cs` prevents silent crashes
+- [x] Renamed `Form2` to `MainForm` (class, files, and handlers)
+- [x] `ResourceGenerator "<game dir>" all --out CP2077SaveEditor/Resources` regenerates all JSONs used by the editor (tested: output matches committed files). README rewritten with current features and instructions
+- [x] Cleanup: removed `AppearanceHelper.cs` (~1,900 unused lines; `AppearanceValueLists`/`AppearanceGender` moved to `Utils/AppearanceValueLists.cs`) and `AppearancePreset.cs`; dead option `EnablePSData`; `config.json` now only holds `EnableWIPFeatures` and is searched in the current directory or next to the `.exe`
+- [x] **Cyberware** tab ([CyberwareControl.cs](CP2077SaveEditor/Views/Controls/CyberwareControl.cs) + [CyberwareHelper.cs](CP2077SaveEditor/Utils/CyberwareHelper.cs)): slots by body area with equipped implant; equip any cyberware for that area (from inventory or by creating the item), unequip; **extra capacity** = additive `Humanity` modifier saved on V's stats, added to the game-calculated capacity (21 + 3×level + Tech skill + perk + shards, see `Character.PlayerCyberwareSystem` in TweakDB). `ResourceGenerator ... cyberware` generates `Resources/Cyberware.json` (1,582 items → area). Inventory "Equip in Slot" now writes the full ItemID (seed + counter), matching the game
+- [x] **Perks** tab ([PerksControl.cs](CP2077SaveEditor/Views/Controls/PerksControl.cs) + [PerkHelper.cs](CP2077SaveEditor/Utils/PerkHelper.cs)): 2.0 trees per attribute + Relic, names in Windows language, tier, current/max level; double-click toggles, "Set level", "Max all", "Remove all"; option to spend/refund perk points (Relic points for Espionage). `ResourceGenerator ... perks` generates `Resources/Perks.json` (194 perks). Prerequisites between perks are not checked
+- [x] "Saves" home screen ([SaveBrowserControl.cs](CP2077SaveEditor/Views/Controls/SaveBrowserControl.cs)): lists save folders with thumbnail, level, life path, gender, playtime, patch, date, and "modded" flag (from `metadata.9.json`), search, and autosave filter; double-click opens (with unsaved changes prompt) and switches to the Player Stats tab
+- [x] Round-trip tests (`CP2077SaveEditor.Tests`, xUnit v3): identical save on rewrite, reading all stats changes nothing, editing doesn't leak to items sharing a slice, Tier 5++ idempotent, independent clone, player stats. Uses `CP2077_TEST_SAVE`; skipped when unset (CI). `SaveFileHelper.Serialize()` and `CloneStats()` are now shared between UI and tests
+- [x] Fixes after 28/10 testing: virtual list crash when shrinking with selected items (`TypeExtensions.RetrieveDefaultVirtualItem`); double-click in inventory opens the clicked row (previously opened the first selected item); "Make Tier 5++" warns when already maxed; `ModernButton` tooltips (child label swallowed hover); CI without double zip and with updated actions
+- [x] Fixes after 29/10 testing (everything passed in-game: extra capacity, implants above limit, perks, 5++ clone, persistence after saving in-game): `ModernButton` tooltips again (label was created in `OnCreateControl`, after the screen constructor; now created in the button constructor); `ModernValuePicker` drew in hardcoded black (gender/voice unreadable in dark mode), now follows `ForeColor`; `TabPage` with `UseVisualStyleBackColor` stayed white in dark mode; scrolled virtual list shrinking (filter) left blank rows at the top (`SetVirtualItems` scrolls to top before shrinking)
+- [x] Extras tab: "Unlock Fast Travel" only adds missing points (previously wiped all and recreated from JSON, losing points unknown to JSON); confirmation/feedback and tooltips on all three actions
+- [x] Bulk actions in inventory context menu: "Set Quantity..." (stackable items) and "Make Tier 5++". To move all of a type: search `type:Weapon` and use "Move All Listed Items to Stash"
+- [x] Automated test via real `MainForm` on a 2.5 save: loads editable, no false unsaved changes warning, Tier 5++ + save + verify OK
+- [x] Visual highlight on active sidebar button (`ModernButton.IsSelected`, `ScrollMenuControl.SelectButton`, and `SwitchPanel` in `MainForm.cs`) + mouse wheel scrolling over menu buttons
+- [x] Version in `.csproj` (`<Version>0.29.0</Version>`, shown in status bar) and update check on startup ([UpdateChecker.cs](CP2077SaveEditor/Utils/UpdateChecker.cs)): queries the latest release on the GitHub fork and, if newer, turns the version into a download link. Can be disabled with `"CheckForUpdates": 0` in `config.json`
+- [x] Unsaved changes indicator: `*` after the save name (title and sidebar). Edit actions call `ChangeTracker.MarkChanged()` ([ChangeTracker.cs](CP2077SaveEditor/Utils/ChangeTracker.cs)); cleared on load/save and when the hash check concludes nothing changed. **When creating a new action that modifies the save, call `ChangeTracker.MarkChanged()`**
+- [x] **Modern GUI (taste-skill `data-terminal`):** neutral dark palette (`#111113`–`#2B2B33`), primary Cyberpunk yellow accent (`#FCEE0A`) and secondary cyan (`#00F0FF`) in `Theme.cs` / `ModernButton` / `ModernValuePicker` / `GroupBox` / `ListView` headers; `Bahnschrift` + tabular `Cascadia Mono` / `Consolas` typography for numeric values; `PlayerStatsControl` reorganized into resizable `TableLayoutPanel` + `GroupBox`; widened sidebar (176 px) with compact height (44 px); resized buttons and search bars for High DPI in `QuestFactsControl` and `AppearanceControl`; explanatory tooltips (`Theme.SetToolTip`) across all tabs
 
 ---
 
-## 🟡 GUI moderna
+## 🔴 High Priority — Fixes
 
-#### Visual Cyberpunk (amarelo/ciano) — feito
-- Direção estética `data-terminal` (`Leonxlnx/taste-skill`, seed `1440651410`): superfícies escuras neutras (`#111113` / `#17171A` / `#1F1F24`), destaque primário amarelo (`Theme.Accent` `#FCEE0A`), destaque secundário ciano (`Theme.CyanAccent` `#00F0FF` no tema escuro / `#007A8C` no claro) nos títulos de `GroupBox`, cabeçalhos de colunas, `ModernValuePicker` e hover de `ModernButton`.
-- Tipografia: `Bahnschrift` (fallback `Segoe UI`) para interface e `Cascadia Mono` (fallback `Consolas`) para campos numéricos (`NumericUpDown`).
+### Test Patch 2.5 in-game — done (29/10/2026)
+- [x] Edit a 2.5 save (a copy!) in the app: change a weapon's Quality, clone an item, change money/attributes. Load in-game and verify that the edited item changed, that **other weapons of the same model did not change**, and that the save loads without errors.
+- [x] "Make Tier 5++" on a looted weapon (e.g. Pulsar) and an iconic (e.g. Warden): verify in-game that they become Tier 5++ and damage increased. Iconics use their own curves and are the least certain.
+- [x] Repeat with an older save (tested with a 2.2 save) to ensure the legacy path (`Keys`/`Values`) still works.
+- **Known risks:**
+  - The meaning of `gameBufferSlice.Combined` flags (bits 30–31) was deduced from the save: 0 = item modifiers, 1 = entity modifiers (player), 2 = modifier groups.
+  - When `sharedDataBuffer` fills up, it grows to the next power of 2 (the game used 32768). This has not been tested in-game yet: the current save has ~10 KB free.
+  - Slices that are no longer used remain in the buffer, and each saved edit appends a new slice (no compaction).
 
-#### DPI alto e redimensionamento — feito
-- `Application.SetHighDpiMode(HighDpiMode.PerMonitorV2)` em [Program.cs](CP2077SaveEditor/Program.cs); `MinimumSize = 960x580` em `MainForm`.
-- `PlayerStatsControl` refeito com `TableLayoutPanel` e `GroupBox` responsivos (substituindo as coordenadas fixas herdadas da antiga imagem de fundo).
-- Botões de topo redimensionados para `28px` em `AppearanceControl` e `QuestFactsControl`; barra lateral alargada para `176px` com `Anchor` horizontal.
+### Static resources — remaining items
+- `Vehicles.json` ✅ and `ModifierGroups.json` (regenerated, no changes) ✅.
+- `ItemClasses.json` ✅ (regenerated with new WolvenKit; all names resolve).
+- **`FastTravel.json`:** checked against TweakDB 2.5 (29/10/2026): covers 232 of 245 `gamedataFastTravelPoint_Record`, including Dogtown. The remaining 13 are test maps (`gym_tech_*`), unused legacy names (`WatsonMain`, `WatsonSubway`...), and `wat_lch_dataterm_08`. A generator wouldn't help: `MarkerRef` comes from the world, not TweakDB. To re-check, compare points from a 100% save against the JSON. **`Facts.json`** likely came from an external dump; document its origin.
+- **`AppearanceValues.json`:** `GenerateAppearanceValues` reads `basegame_1_engine.archive`; check whether it still works.
 
-#### Barra lateral com ícones — feito
-- Destaque da página ativa com barra amarela + ícone colorido (`IGameControl.Icon`, glifo de Segoe Fluent Icons / Segoe MDL2 Assets em `ModernButton.IconGlyph`), alinhamento à esquerda sem corte de texto e rolagem automática ao selecionar aba (`ScrollMenuControl.SelectButton`).
+### UI testing — done
+- [x] Vehicles tab: search, Unlock all/Lock all with and without filter, double-click with multiple selected.
+- [x] Stats editor (`StatsControl`) on a 2.5 save item: list, add, and remove modifiers. The "create forced modifiers" button is disabled (the 2.5 format doesn't have that field).
+- [x] The read-only lock (verified in code; still need a save from patch > 2.5 to test for real) only triggers for saves newer than 2.5 (`gameGameVersion.Current` = 2500).
 
-#### Desfazer/refazer — feito
-- `Ctrl+Z` / `Ctrl+Y` ([UndoHistory.cs](CP2077SaveEditor/Utils/UndoHistory.cs) + `MainForm.CaptureUndoPoint`/`RestoreState`). Um ponto é o save inteiro serializado (~4 MB), gravado 1,5 s depois que as edições param (`ChangeTracker.Edited`), na thread da UI (~1,3 s) e nunca com diálogo aberto. Desfazer relê o estado e as páginas reinicializam como num carregamento (~6 s). `"UndoSteps"` no `config.json`.
-- **Melhoria possível:** desfazer é lento porque relê o save inteiro. Guardar e restaurar só os nós alterados (inventário, stats...) seria bem mais rápido, mas exige saber quais nós cada ação muda.
+---
 
-#### Tooltips e tradução — tooltips feitos
-- **Feito (Tooltips):** `Theme.SetToolTip` aplicado nas ações principais e destrutivas (`MainForm`, `PlayerStatsControl`, `AppearanceControl`, `InventoryControl`, `CyberwareControl`, `PerksControl`, `VehiclesControl`, `QuestFactsControl`, `ExtrasControl`).
-- **Falta (Tradução):** mover os textos para `Properties/Resources.resx` + `Resources.pt-BR.resx` e trocar as strings literais por `Resources.Xxx`.
+## 🟠 Medium Priority — Usability
+
+### Inventory
+
+#### Exact intermediate tiers (1–5) and "+" — not feasible for now
+- Random weapons/clothing tiers come from curves over `RandomCurveInput`, rolled by the game from the seed; base tier cannot be calculated outside the game (see "Color by rarity").
+- The game only caps the final value (Quality 0–4, IsItemPlus 0–2). Without knowing the base, an additive modifier only guarantees the extremes: +large = Tier 5++ (already implemented), −large = Tier 1. A middle tier would require knowing the base.
+
+#### Color by rarity — missing on weapons and clothing
+- Done for fixed-rarity items (mods, quickhacks, cyberware, consumables...): `ItemClasses.json` has `Quality` and the name is colored in `RefreshInventory` (`Theme.GetQualityColor`).
+- **Missing:** weapons and clothing whose record modifies `BaseStats.Quality` (they have no `Quality` in the JSON). Their tier comes from curves over `RandomCurveInput` rolled from the seed, so it cannot be computed outside the game. The only plausible solution: read a value the game already computed and saved, if one exists (look in the save for something like a stats cache / `MaxQualityWhenLooted`).
+
+### Character
+
+#### Respec — skip (the game already has it)
+- Since 2.0, the game refunds perks for free in its own menu and offers an attribute reset; the Player Stats tab already edits attributes and points (`DevPoints`) directly. Only worth doing if requested.
+- **Where, if needed:** `PlayerDevelopmentData.AttributesData[].UnlockedPerks` (2.0 perks) and `DevPoints` (`Attribute`, `Primary`, `Espionage`) via `GetPlayerDevelopmentData()`.
+
+#### Appearance tab — evaluated, not worth it right now
+- Currently: gender, voice, presets, and the advanced editor (raw groups). The `HairStyle`/`HairColor`/`EyeColor` fields in `AppearanceHelper2` are hidden because `SetValue` was never implemented.
+- In 2.x, hairstyle is a `.app` path (`hairs` → `hh_025_pwa__hairs_081.app`, with a matching `FPP_hairs` entry), hair color is `Definition` (`07_blonde_golden`), and eye color uses names like `he_000_pwa__basehead__15_gradient_light_blue`, different from `AppearanceValueLists` (1.x-era list).
+- Implementing this would require mapping paths and testing in-game (risk of bald V). The in-game mirror (2.0+) already changes hair and eyes, so only worth doing if requested.
+
+### World
+- [x] **Gigs / NCPD — not feasible with facts alone:** there is no "gig completed" fact. The ~690 `sts_*` facts are internal stages of each gig (`..._combat_start`, `..._chase_spawned`) and fixer rep levels (`sts_<fixer>_tier_1..4`); `ma_*` are NCPD scanner hustles. Completion lives in the quest journal, which the editor does not edit. Changing facts alone would leave gigs half-done.
+- [x] **Fast travel:** "Unlock all" in `ExtrasControl.btn_UnlockAll_Click`; `FastTravel.json` verified for 2.5 (see "Static resources").
+- [x] **Wardrobe — evaluated, not worth it right now:** inventory `0x7901DE03D136A5AF` ("V's Wardrobe") already appears and can be edited in `InventoryControl`, and `ModSupport/ExtraWardrobeSlots` already has blacklist cleanup support in `ExtrasControl`. Native wardrobe outfits (`WardrobeSystem_ClothingSets`) store 6 binary blocks of `0x8E` bytes with `Unknown1..Unknown6` fields unmapped in WolvenKit's parser, and `WardrobeSystem` requires each `.ent`'s internal `AppearanceName` (absent from `ItemClasses.json`). The game itself already lets you build and swap outfits for free.
+
+---
+
+## 🟡 Modern GUI
+
+#### Cyberpunk look (yellow/cyan) — done
+- `data-terminal` aesthetic direction (`Leonxlnx/taste-skill`, seed `1440651410`): neutral dark surfaces (`#111113` / `#17171A` / `#1F1F24`), primary yellow accent (`Theme.Accent` `#FCEE0A`), secondary cyan accent (`Theme.CyanAccent` `#00F0FF` in dark theme / `#007A8C` in light) on `GroupBox` titles, column headers, `ModernValuePicker`, and `ModernButton` hover.
+- Typography: `Bahnschrift` (fallback `Segoe UI`) for UI and `Cascadia Mono` (fallback `Consolas`) for numeric fields (`NumericUpDown`).
+
+#### High DPI and resizing — done
+- `Application.SetHighDpiMode(HighDpiMode.PerMonitorV2)` in [Program.cs](CP2077SaveEditor/Program.cs); `MinimumSize = 960x580` on `MainForm`.
+- `PlayerStatsControl` rebuilt with responsive `TableLayoutPanel` and `GroupBox` (replacing fixed coordinates inherited from the old background image).
+- Top buttons resized to `28px` in `AppearanceControl` and `QuestFactsControl`; sidebar widened to `176px` with horizontal `Anchor`.
+
+#### Sidebar with icons — done
+- Active page highlight with yellow bar + colored icon (`IGameControl.Icon`, Segoe Fluent Icons / Segoe MDL2 Assets glyph in `ModernButton.IconGlyph`), left alignment without text clipping, and automatic scroll when selecting a tab (`ScrollMenuControl.SelectButton`).
+
+#### Undo/redo — done
+- `Ctrl+Z` / `Ctrl+Y` ([UndoHistory.cs](CP2077SaveEditor/Utils/UndoHistory.cs) + `MainForm.CaptureUndoPoint`/`RestoreState`). A snapshot is the full serialized save (~4 MB), captured 1.5 s after edits stop (`ChangeTracker.Edited`), on the UI thread (~1.3 s) and never while a dialog is open. Undoing re-parses the state and tabs reinitialize as on load (~6 s). `"UndoSteps"` in `config.json`.
+- **Possible improvement:** undo is slow because it re-reads the entire save. Storing and restoring only modified nodes (inventory, stats...) would be much faster, but requires tracking which nodes each action touches.
+
+#### Tooltips and localization — tooltips done
+- **Done (Tooltips):** `Theme.SetToolTip` applied to primary and destructive actions (`MainForm`, `PlayerStatsControl`, `AppearanceControl`, `InventoryControl`, `CyberwareControl`, `PerksControl`, `VehiclesControl`, `QuestFactsControl`, `ExtrasControl`).
+- **Missing (Localization):** move UI strings to `Properties/Resources.resx` + `Resources.pt-BR.resx` and replace string literals with `Resources.Xxx`.
 
 #### WPF/Avalonia?
-- **Recomendação:** só depois dos itens acima. A lógica está acoplada aos controles WinForms (por exemplo, o `InventoryControl` mexe direto no save). Um primeiro passo seria extrair a lógica para serviços (`InventoryService` etc.), o que já ajuda nos testes.
+- **Recommendation:** only after the items above. Logic is coupled to WinForms controls (e.g., `InventoryControl` mutates the save directly). A first step would be extracting logic into services (`InventoryService`, etc.), which also helps testing.
 
 ---
 
-## 🔵 Infraestrutura e manutenção
+## 🔵 Infrastructure & Maintenance
 
-- [x] **Refatorar arquivos grandes:** `InventoryControl.cs` (~975 linhas). Extraídos, com testes: cofre ([StashHelper.cs](CP2077SaveEditor/Utils/StashHelper.cs)), clone de itens (`SaveFileHelper.CloneItem`) e menu de contexto ([InventoryContextMenuBuilder.cs](CP2077SaveEditor/Views/InventoryContextMenuBuilder.cs)).
-- [x] **Warnings:** o código do editor compila sem warnings; os ~850 restantes são todos do submódulo WolvenKit (não mexer lá).
+- [x] **Refactor large files:** `InventoryControl.cs` (~975 lines). Extracted with tests: stash ([StashHelper.cs](CP2077SaveEditor/Utils/StashHelper.cs)), item cloning (`SaveFileHelper.CloneItem`), and context menu ([InventoryContextMenuBuilder.cs](CP2077SaveEditor/Views/InventoryContextMenuBuilder.cs)).
+- [x] **Warnings:** editor code compiles with zero warnings; the remaining ~850 warnings are all from the `WolvenKit` submodule (do not touch it).
