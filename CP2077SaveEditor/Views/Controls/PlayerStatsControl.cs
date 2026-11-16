@@ -35,6 +35,7 @@ namespace CP2077SaveEditor.Views.Controls
 
             var toolTip = new ToolTip();
             Theme.SetToolTip(toolTip, additionalPlayerStatsButton, "Inspect and edit raw stat modifiers attached to V's entity.");
+            Theme.SetToolTip(toolTip, bonusPlayerStatsButton, "Add bonus Max Health, Armor, Stamina, Cyberdeck RAM, Carry Capacity, Crit Chance/Damage, or Speed.");
             Theme.SetToolTip(toolTip, respecAttributesButton, "Reset all Core Attributes to 3 and refund the spent points into Attribute Points.");
             Theme.SetToolTip(toolTip, maxAllSkillsButton, "Set all 5 Skill Progressions (Headhunter, Netrunner, Shinobi, Solo, Engineer) to level 60.");
 
@@ -482,6 +483,20 @@ namespace CP2077SaveEditor.Views.Controls
             }
 
             PlayerStatChanged(this, EventArgs.Empty);
+        }
+
+        private void bonusPlayerStatsButton_Click(object sender, EventArgs e)
+        {
+            if (GetPlayerStats() == null)
+            {
+                return;
+            }
+
+            using var dialog = new PlayerBonusStatsDialog(_parentForm.ActiveSaveFile);
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                ChangeTracker.MarkChanged();
+            }
         }
     }
 }

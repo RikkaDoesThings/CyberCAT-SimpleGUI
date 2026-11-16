@@ -1,16 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using WolvenKit.RED4.Save.Classes;
 using WolvenKit.RED4.Types;
 
 namespace CP2077SaveEditor.Utils
 {
     /// <summary>
-    /// Bulk-adds missing Iconic/Tier 5 Quickhacks, Iconic Weapon Mods, and Wardrobe Clothing Sets.
+    /// Bulk-adds missing Iconic/Tier 5 Quickhacks, Iconic Weapon Mods, Iconic Cyberware, and Wardrobe Clothing Sets.
     /// </summary>
     public static class BulkPackHelper
     {
+        private record CyberwareTierDto(string Tier, string ItemId, int Capacity);
+        private record CyberwareCatalogueEntryDto(string Name, string Slot, bool IsIconic, List<CyberwareTierDto> Tiers);
+
+        private static readonly Lazy<List<ulong>> s_iconicCyberwareIds = new(() =>
+        {
+            var entries = JsonSerializer.Deserialize<List<CyberwareCatalogueEntryDto>>(Properties.Resources.CyberwareCatalogue) ?? new();
+            var ids = new List<ulong>();
+            foreach (var entry in entries.Where(x => x.IsIconic && x.Tiers is { Count: > 0 }))
+            {
+                var bestTier = entry.Tiers.FirstOrDefault(t => t.Tier == "T5++") ?? entry.Tiers[0];
+                var id = (ulong)(TweakDBID)bestTier.ItemId;
+                if (id != 0)
+                {
+                    ids.Add(id);
+                }
+            }
+            return ids;
+        });
+
+        public static IReadOnlyList<ulong> IconicCyberwareIds => s_iconicCyberwareIds.Value;
+
+        public static int AddMissingIconicCyberware(SaveFileHelper save)
+        {
+            return AddMissingToInventory(save, save.GetInventory(StashHelper.PlayerInventoryId), IconicCyberwareIds, checkStashToo: false, makeMaxTier: true);
+        }
         public static int AddMissingQuickhacks(SaveFileHelper save, bool iconic = true)
         {
             var ids = iconic ? ResourceHelper.QuickhacksAndMods.IconicQuickhacks : ResourceHelper.QuickhacksAndMods.Tier5Quickhacks;

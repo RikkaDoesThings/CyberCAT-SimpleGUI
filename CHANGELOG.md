@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.38.0
+
+- **Bonus Player Stats Dialog (`Player Stats` → `Bonus Stats (HP/Armor/RAM)...`):** add clean, persistent additive bonuses directly to V for **Max Health**, **Armor**, **Max Stamina**, **Cyberdeck RAM**, **Carry Capacity**, **Crit Chance %**, **Crit Damage %**, and **Movement Speed** (solves GitHub Issue #146).
+- **Bulk Add Iconic Cyberware (`Inventory` → `Bulk Add ▾` → `Add Missing Iconic Cyberware (Tier 5++)`):** scans V's inventory and adds every missing Iconic Cyberware implant from Phantom Liberty / 2.0+ directly at **Tier 5++**.
+- **Expanded Quest Facts Presets (`Quest Facts` → `Presets ▾`):** added 1-click presets for **Apartment Pets** (*Adopt Nibbles the Cat* & *Hatch Iguana*), **Save Takemura** (`q112_takemura_dead = 0`), **Friendly Fingers MD**, and **Fix Pacifica Rollercoaster**.
+
 ## 0.37.0
 
 - **Respec Attributes & Max All Skills (`Player Stats` tab):** added **`Respec Attributes`** (resets Core Attributes to 3 and refunds all spent points into Attribute Points) and **`Max All Skills (60)`** (sets all 5 Skill Progressions to 60 in one click).

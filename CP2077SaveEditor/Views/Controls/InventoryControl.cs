@@ -982,6 +982,7 @@ namespace CP2077SaveEditor.Views.Controls
         {
             var menu = new ContextMenuStrip();
             menu.Items.Add("Add Missing Iconic Weapons to Stash (Tier 5++)", null, (_, _) => AddMissingIconicWeapons());
+            menu.Items.Add("Add Missing Iconic Cyberware (Tier 5++)", null, (_, _) => AddBulkIconicCyberware());
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add("Add Missing Iconic Quickhacks", null, (_, _) => AddBulkQuickhacks(iconic: true));
             menu.Items.Add("Add Missing Tier 5 Quickhacks", null, (_, _) => AddBulkQuickhacks(iconic: false));
@@ -1035,6 +1036,22 @@ namespace CP2077SaveEditor.Views.Controls
             }
 
             MessageBox.Show($"Added {added} missing iconic weapon(s) to V's Stash.", "Add Missing Iconics", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void AddBulkIconicCyberware()
+        {
+            var added = BulkPackHelper.AddMissingIconicCyberware(_parentForm.ActiveSaveFile);
+            if (added > 0)
+            {
+                ChangeTracker.MarkChanged();
+                RefreshInventory();
+            }
+
+            MessageBox.Show(
+                added > 0 ? $"Added {added} missing Iconic Cyberware implant(s) (Tier 5++) to V's Inventory." : "You already own all Iconic Cyberware implants.",
+                "Iconic Cyberware",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
 
         private void AddBulkQuickhacks(bool iconic)

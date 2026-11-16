@@ -198,6 +198,46 @@ namespace CP2077SaveEditor.Views.Controls
             });
             menu.Items.Add("Secret Ending ('Don't Fear the Reaper')", null, enableSecretEndingButton_Click);
             menu.Items.Add("Make All Characters Romanceable", null, makeAllRomanceableButton_Click);
+            menu.Items.Add(new ToolStripSeparator());
+            menu.Items.Add("Apartment Pet: Adopt Nibbles the Cat", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("nibbles_unlocked", 1);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Nibbles the cat unlocked in V's Megabuilding H10 apartment.", "Quest Facts Preset");
+            });
+            menu.Items.Add("Apartment Pet: Hatch Iguana", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("mws_wat_02_started", 1);
+                _parentForm.ActiveSaveFile.SetFactByName("mws_wat_02_egg_placed", 1);
+                _parentForm.ActiveSaveFile.SetFactByName("mws_wat_02_iguana_hatched", 1);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Iguana hatched in V's Megabuilding H10 apartment.", "Quest Facts Preset");
+            });
+            menu.Items.Add("Story: Mark Takemura Alive (q112_takemura_dead = 0)", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("q112_takemura_dead", 0);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Takemura marked as alive (q112_takemura_dead = 0).", "Quest Facts Preset");
+            });
+            menu.Items.Add("Story: Friendly Fingers MD (Not Beaten / Alive)", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("q105_fingers_beaten", 0);
+                _parentForm.ActiveSaveFile.SetFactByName("q105_fingers_dead", 0);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Fingers MD marked as alive and friendly.", "Quest Facts Preset");
+            });
+            menu.Items.Add("World: Fix Pacifica Rollercoaster", null, (_, _) =>
+            {
+                _parentForm.ActiveSaveFile.SetFactByName("mq006_roller_coaster_fixed", 1);
+                _parentForm.ActiveSaveFile.SetFactByName("mq006_enable_repeatable_rollercoaster", 1);
+                ChangeTracker.MarkChanged();
+                RefreshFacts();
+                MessageBox.Show("Pacifica Rollercoaster repaired and enabled.", "Quest Facts Preset");
+            });
             Theme.Apply(menu);
             menu.Show(presetsButton, new Point(0, presetsButton.Height));
         }

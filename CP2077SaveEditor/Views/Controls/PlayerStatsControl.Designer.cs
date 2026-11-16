@@ -37,6 +37,7 @@ namespace CP2077SaveEditor.Views.Controls
             additionalPlayerStatsButton = new ModernButton();
             respecAttributesButton = new ModernButton();
             maxAllSkillsButton = new ModernButton();
+            bonusPlayerStatsButton = new ModernButton();
             soloUpDown = new System.Windows.Forms.NumericUpDown();
             shinobiUpDown = new System.Windows.Forms.NumericUpDown();
             netrunnerUpDown = new System.Windows.Forms.NumericUpDown();
@@ -197,6 +198,7 @@ namespace CP2077SaveEditor.Views.Controls
             // 
             gb_LifePath.Controls.Add(lifePathBox);
             gb_LifePath.Controls.Add(lifePathPictureBox);
+            gb_LifePath.Controls.Add(bonusPlayerStatsButton);
             gb_LifePath.Controls.Add(additionalPlayerStatsButton);
             gb_LifePath.Dock = System.Windows.Forms.DockStyle.Fill;
             gb_LifePath.Location = new System.Drawing.Point(570, 4);
@@ -377,10 +379,27 @@ namespace CP2077SaveEditor.Views.Controls
             lifePathPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             lifePathPictureBox.Location = new System.Drawing.Point(14, 65);
             lifePathPictureBox.Name = "lifePathPictureBox";
-            lifePathPictureBox.Size = new System.Drawing.Size(233, 305);
+            lifePathPictureBox.Size = new System.Drawing.Size(233, 267);
             lifePathPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             lifePathPictureBox.TabIndex = 17;
             lifePathPictureBox.TabStop = false;
+            // 
+            // bonusPlayerStatsButton
+            // 
+            bonusPlayerStatsButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            bonusPlayerStatsButton.BackColor = System.Drawing.Color.LightGray;
+            bonusPlayerStatsButton.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            bonusPlayerStatsButton.ClickEffectEnabled = true;
+            bonusPlayerStatsButton.DefaultColor = System.Drawing.Color.LightGray;
+            bonusPlayerStatsButton.HoverColor = System.Drawing.Color.Silver;
+            bonusPlayerStatsButton.Location = new System.Drawing.Point(14, 342);
+            bonusPlayerStatsButton.Name = "bonusPlayerStatsButton";
+            bonusPlayerStatsButton.Size = new System.Drawing.Size(233, 32);
+            bonusPlayerStatsButton.TabIndex = 21;
+            bonusPlayerStatsButton.Text = "Bonus Stats (HP/Armor/RAM)...";
+            bonusPlayerStatsButton.TextColor = System.Drawing.SystemColors.ControlText;
+            bonusPlayerStatsButton.TextFont = new System.Drawing.Font("Segoe UI", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            bonusPlayerStatsButton.Click += bonusPlayerStatsButton_Click;
             // 
             // additionalPlayerStatsButton
             // 
@@ -632,6 +651,7 @@ namespace CP2077SaveEditor.Views.Controls
         private ModernButton additionalPlayerStatsButton;
         private ModernButton respecAttributesButton;
         private ModernButton maxAllSkillsButton;
+        private ModernButton bonusPlayerStatsButton;
         private System.Windows.Forms.NumericUpDown techieUpDown;
         private System.Windows.Forms.NumericUpDown soloUpDown;
         private System.Windows.Forms.NumericUpDown shinobiUpDown;

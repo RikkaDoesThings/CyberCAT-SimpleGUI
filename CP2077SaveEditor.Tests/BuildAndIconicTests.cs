@@ -141,4 +141,21 @@ public class BuildAndIconicTests
         var reloaded = Reload(modified);
         Assert.Equal(0, new CyberwareHelper(reloaded).UpgradeEquippedToMaxTier());
     }
+
+    [Fact]
+    public void PlayerBonusStats_AndIconicCyberware_RoundTrip()
+    {
+        var save = LoadSave();
+
+        Assert.True(BulkPackHelper.IconicCyberwareIds.Count >= 15);
+        BulkPackHelper.AddMissingIconicCyberware(save);
+
+        PlayerBonusStatsHelper.SetBonusStat(save, Enums.gamedataStatType.Health, 500f);
+        PlayerBonusStatsHelper.SetBonusStat(save, Enums.gamedataStatType.CarryCapacity, 1000f);
+
+        var reloaded = Reload(save);
+        Assert.Equal(0, BulkPackHelper.AddMissingIconicCyberware(reloaded));
+        Assert.Equal(500f, PlayerBonusStatsHelper.GetBonusStat(reloaded, Enums.gamedataStatType.Health));
+        Assert.Equal(1000f, PlayerBonusStatsHelper.GetBonusStat(reloaded, Enums.gamedataStatType.CarryCapacity));
+    }
 }
