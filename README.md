@@ -79,7 +79,7 @@ Notes:
 - [bernardomcma](https://github.com/bernardomcma), patch 2.5 support and the v0.29/v0.30 features
 - [topagae](https://github.com/topagae), patch 2.5 fixes merged in v0.30.1 (stats, modded saves, body gender, large saves, licensing), written about 95% by Claude (Anthropic's AI model, via Claude Code) and directed and tested by topagae
 - [CyberCAT by SirBitesalot and other contributors](https://github.com/WolvenKit/CyberCAT)
-- [WolvenKit by the WolvenKit team](https://github.com/WolvenKit/WolvenKit) and modified by [RikkaDoesThings]()
+- [WolvenKit by the WolvenKit team](https://github.com/WolvenKit/WolvenKit) and modified by [RikkaDoesThings](https://github.com/RikkaDoesThings)
 
 ## License
 
